@@ -1,0 +1,1285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>06-用“等待-通知”机制优化循环等待</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <style>
+        html {
+            color: #333;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-rendering: optimizelegibility;
+            font-family: Helvetica Neue, PingFang SC, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif
+        }
+
+        html.borderbox *,
+        html.borderbox :after,
+        html.borderbox :before {
+            box-sizing: border-box
+        }
+
+        article,
+        aside,
+        blockquote,
+        body,
+        button,
+        code,
+        dd,
+        details,
+        dl,
+        dt,
+        fieldset,
+        figcaption,
+        figure,
+        footer,
+        form,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        header,
+        hr,
+        input,
+        legend,
+        li,
+        menu,
+        nav,
+        ol,
+        p,
+        pre,
+        section,
+        td,
+        textarea,
+        th,
+        ul {
+            margin: 0;
+            padding: 0
+        }
+
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        menu,
+        nav,
+        section {
+            display: block
+        }
+
+        audio,
+        canvas,
+        video {
+            display: inline-block
+        }
+
+        body,
+        button,
+        input,
+        select,
+        textarea {
+            font: 300 1em/1.8 PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, Helvetica, sans-serif
+        }
+
+        button::-moz-focus-inner,
+        input::-moz-focus-inner {
+            padding: 0;
+            border: 0
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0
+        }
+
+        fieldset,
+        img {
+            border: 0
+        }
+
+        blockquote {
+            position: relative;
+            color: #999;
+            font-weight: 400;
+            border-left: 1px solid #1abc9c;
+            padding-left: 1em;
+            margin: 1em 3em 1em 2em
+        }
+
+        @media only screen and (max-width: 640px) {
+            blockquote {
+                margin: 1em 0
+            }
+        }
+
+        abbr,
+        acronym {
+            border-bottom: 1px dotted;
+            font-variant: normal
+        }
+
+        abbr {
+            cursor: help
+        }
+
+        del {
+            text-decoration: line-through
+        }
+
+        address,
+        caption,
+        cite,
+        code,
+        dfn,
+        em,
+        th,
+        var {
+            font-style: normal;
+            font-weight: 400
+        }
+
+        ol,
+        ul {
+            list-style: none
+        }
+
+        caption,
+        th {
+            text-align: left
+        }
+
+        q:after,
+        q:before {
+            content: ""
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative
+        }
+
+        :root sub,
+        :root sup {
+            vertical-align: baseline
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        a {
+            color: #1abc9c
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        .typo a {
+            border-bottom: 1px solid #1abc9c
+        }
+
+        .typo a:hover {
+            border-bottom-color: #555;
+            color: #555
+        }
+
+        .typo a:hover,
+        a,
+        ins {
+            text-decoration: none
+        }
+
+        .typo-u,
+        u {
+            text-decoration: underline
+        }
+
+        mark {
+            background: #fffdd1;
+            border-bottom: 1px solid #ffedce;
+            padding: 2px;
+            margin: 0 5px
+        }
+
+        code,
+        pre,
+        pre tt {
+            font-family: Courier, Courier New, monospace
+        }
+
+        pre {
+            background: hsla(0, 0%, 97%, .7);
+            border: 1px solid #ddd;
+            padding: 1em 1.5em;
+            display: block;
+            -webkit-overflow-scrolling: touch
+        }
+
+        hr {
+            border: none;
+            border-bottom: 1px solid #cfcfcf;
+            margin-bottom: .8em;
+            height: 10px
+        }
+
+        .typo-small,
+        figcaption,
+        small {
+            font-size: .9em;
+            color: #888
+        }
+
+        b,
+        strong {
+            font-weight: 700;
+            color: #000
+        }
+
+        [draggable] {
+            cursor: move
+        }
+
+        .clearfix:after,
+        .clearfix:before {
+            content: "";
+            display: table
+        }
+
+        .clearfix:after {
+            clear: both
+        }
+
+        .clearfix {
+            zoom: 1
+        }
+
+        .textwrap,
+        .textwrap td,
+        .textwrap th {
+            word-wrap: break-word;
+            word-break: break-all
+        }
+
+        .textwrap-table {
+            table-layout: fixed
+        }
+
+        .serif {
+            font-family: Palatino, Optima, Georgia, serif
+        }
+
+        .typo-dl,
+        .typo-form,
+        .typo-hr,
+        .typo-ol,
+        .typo-p,
+        .typo-pre,
+        .typo-table,
+        .typo-ul,
+        .typo dl,
+        .typo form,
+        .typo hr,
+        .typo ol,
+        .typo p,
+        .typo pre,
+        .typo table,
+        .typo ul,
+        blockquote {
+            margin-bottom: 1rem
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: PingFang SC, Helvetica Neue, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
+            color: #000;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo-h2,
+        .typo-h3,
+        .typo-h4,
+        .typo-h5,
+        .typo-h6,
+        .typo h1,
+        .typo h2,
+        .typo h3,
+        .typo h4,
+        .typo h5,
+        .typo h6 {
+            margin-top: 1.2em;
+            margin-bottom: .6em;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo h1 {
+            font-size: 2em
+        }
+
+        .typo-h2,
+        .typo h2 {
+            font-size: 1.8em
+        }
+
+        .typo-h3,
+        .typo h3 {
+            font-size: 1.6em
+        }
+
+        .typo-h4,
+        .typo h4 {
+            font-size: 1.4em
+        }
+
+        .typo-h5,
+        .typo-h6,
+        .typo h5,
+        .typo h6 {
+            font-size: 1.2em
+        }
+
+        .typo-ul,
+        .typo ul {
+            margin-left: 1.3em;
+            list-style: disc
+        }
+
+        .typo-ol,
+        .typo ol {
+            list-style: decimal;
+            margin-left: 1.9em
+        }
+
+        .typo-ol ol,
+        .typo-ol ul,
+        .typo-ul ol,
+        .typo-ul ul,
+        .typo li ol,
+        .typo li ul {
+            margin-bottom: .8em;
+            margin-left: 2em
+        }
+
+        .typo-ol ul,
+        .typo-ul ul,
+        .typo li ul {
+            list-style: circle
+        }
+
+        .typo-table td,
+        .typo-table th,
+        .typo table caption,
+        .typo table td,
+        .typo table th {
+            border: 1px solid #ddd;
+            padding: .5em 1em;
+            color: #666
+        }
+
+        .typo-table th,
+        .typo table th {
+            background: #fbfbfb
+        }
+
+        .typo-table thead th,
+        .typo table thead th {
+            background: hsla(0, 0%, 95%, .7)
+        }
+
+        .typo table caption {
+            border-bottom: none
+        }
+
+        .typo-input,
+        .typo-textarea {
+            -webkit-appearance: none;
+            border-radius: 0
+        }
+
+        .typo-em,
+        .typo em,
+        caption,
+        legend {
+            color: #000;
+            font-weight: inherit
+        }
+
+        .typo-em {
+            position: relative
+        }
+
+        .typo-em:after {
+            position: absolute;
+            top: .65em;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            content: "\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB"
+        }
+
+        .typo img {
+            max-width: 100%
+        }
+
+        .common-content {
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.75rem;
+            white-space: normal;
+            word-break: normal;
+            font-size: 1rem
+        }
+
+        .common-content img {
+            display: block;
+            max-width: 100%;
+            background-color: #eee
+        }
+
+        .common-content audio,
+        .common-content video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        .common-content center,
+        .common-content font {
+            margin-top: 1rem;
+            display: inline-block
+        }
+
+        .common-content center {
+            width: 100%
+        }
+
+        .common-content pre {
+            margin-top: 1rem;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            overflow: hidden
+        }
+
+        .common-content pre code {
+            font-size: .8rem;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            overflow-x: auto
+        }
+
+        .common-content hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        .common-content b,
+        .common-content h1,
+        .common-content h2,
+        .common-content h3,
+        .common-content h4,
+        .common-content h5,
+        .common-content strong {
+            font-weight: 700
+        }
+
+        .common-content h1,
+        .common-content h2 {
+            font-size: 1.125rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content h3,
+        .common-content h4,
+        .common-content h5 {
+            font-size: 1rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: .15rem
+        }
+
+        .common-content .orange {
+            color: #ff5a05
+        }
+
+        .common-content .reference {
+            font-size: 1rem;
+            color: #888
+        }
+
+        .custom-rich-content h1 {
+            margin-top: 0;
+            font-weight: 400;
+            font-size: 15.25px;
+            border-bottom: 1px solid #eee;
+            line-height: 2.8
+        }
+
+        .custom-rich-content li,
+        .custom-rich-content p {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6
+        }
+
+        table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        table.hljs-ln,
+        table.hljs-ln tbody,
+        table.hljs-ln td,
+        table.hljs-ln tr {
+            box-sizing: border-box
+        }
+
+        table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none
+        }
+
+        table.hljs-ln td.hljs-ln-code,
+        table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            font-size: 12px;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            color: #24292e;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+        video::-webkit-media-controls {
+            overflow: hidden !important
+        }
+
+        video::-webkit-media-controls-enclosure {
+            width: calc(100% + 32px);
+            margin-left: auto
+        }
+
+        ._29HP61GA_0 {
+            max-width:800px;
+            margin:0 auto;
+            margin-bottom: 20px;
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.76;
+            white-space: normal;
+            word-break: normal;
+            font-size: 17px;
+            -webkit-transition: background-color .3s ease;
+            transition: background-color .3s ease
+        }
+
+        ._29HP61GA_0 .MathJax_Display {
+            overflow: auto
+        }
+
+        ._29HP61GA_0 .poster {
+            position: fixed;
+            left: -10000px;
+            top: -10000px;
+            overflow: hidden;
+            padding: 1rem;
+            background: #ececec
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy {
+            font-size: 13px;
+            color: #888;
+            position: absolute;
+            right: 1em;
+            top: .5em;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy .iconfont {
+            font-size: 12px;
+            margin-right: .2em
+        }
+
+        ._29HP61GA_0 a {
+            color: #fa8919;
+            border-bottom: 1px solid #fa8919
+        }
+
+        ._29HP61GA_0 img {
+            display: block;
+            max-width: 100%;
+            position: relative;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            background-color: #eee;
+            vertical-align: top;
+            border-radius: 0
+        }
+
+        ._29HP61GA_0 audio,
+        ._29HP61GA_0 video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        ._29HP61GA_0 pre {
+            margin-top: 16px;
+            padding: 34px 0 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-radius: 6px;
+            background: rgba(246, 247, 251, .749);
+            border: 0
+        }
+
+        ._29HP61GA_0 pre code {
+            font-size: 12px;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-left: 16px;
+            margin-right: 16px;
+            overflow-x: scroll
+        }
+
+        ._29HP61GA_0 pre code:after {
+            content: "";
+            height: 30px;
+            width: 100%;
+            display: block
+        }
+
+        ._29HP61GA_0 hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        ._29HP61GA_0 h1,
+        ._29HP61GA_0 h2,
+        ._29HP61GA_0 h3,
+        ._29HP61GA_0 h4,
+        ._29HP61GA_0 h5 {
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 b,
+        ._29HP61GA_0 strong {
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 h1 {
+            font-size: 21px
+        }
+
+        ._29HP61GA_0 h2 {
+            font-size: 20px
+        }
+
+        ._29HP61GA_0 h3 {
+            font-size: 19px
+        }
+
+        ._29HP61GA_0 h4 {
+            font-size: 18px
+        }
+
+        ._29HP61GA_0 h5 {
+            font-size: 17px
+        }
+
+        ._29HP61GA_0 center,
+        ._29HP61GA_0 p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: 0;
+            margin-bottom: 30px;
+            word-break: break-word
+        }
+
+        ._29HP61GA_0 center {
+            text-align: center
+        }
+
+        ._29HP61GA_0 blockquote {
+            margin-top: 0;
+            margin-bottom: 34px;
+            border-left: 3px solid #e8e8e8;
+            padding-left: 17px;
+            color: #353535
+        }
+
+        ._29HP61GA_0 blockquote p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol,
+        ._29HP61GA_0 ul {
+            margin-bottom: 30px
+        }
+
+        ._29HP61GA_0 ol p,
+        ._29HP61GA_0 ul p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol {
+            list-style: decimal;
+            margin-left: 20px
+        }
+
+        ._29HP61GA_0 ul li {
+            padding-left: 17px;
+            position: relative;
+            margin-bottom: 10px
+        }
+
+        ._29HP61GA_0 ul li:after {
+            content: "";
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            background: #353535;
+            position: absolute;
+            top: 10px;
+            left: 0
+        }
+
+        ._29HP61GA_0 .orange {
+            color: #fa8919
+        }
+
+        ._29HP61GA_0 .reference {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-right {
+            text-align: right
+        }
+
+        ._29HP61GA_0 .m-center {
+            text-align: center;
+            display: block
+        }
+
+        ._29HP61GA_0 .m-gray {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-small {
+            font-size: 15px
+        }
+
+        ._29HP61GA_0 table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        ._29HP61GA_0 table.hljs-ln,
+        ._29HP61GA_0 table.hljs-ln tbody,
+        ._29HP61GA_0 table.hljs-ln td,
+        ._29HP61GA_0 table.hljs-ln tr {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box
+        }
+
+        ._29HP61GA_0 table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            font-size: 12px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code,
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            font-size: 13px;
+            color: #666;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+    </style>
+</head>
+<body>
+<div class="_29HP61GA_0">
+<h1>06-用“等待-通知”机制优化循环等待</h1>
+<p>由上一篇文章你应该已经知道，在<strong>破坏占用且等待条件</strong>的时候，如果转出账本和转入账本不满足同时在文件架上这个条件，就用死循环的方式来循环等待，核心代码如下：</p><pre><code>// 一次性申请转出账户和转入账户，直到成功
+while(!actr.apply(this, target))
+  ；
+</code></pre><p>如果apply()操作耗时非常短，而且并发冲突量也不大时，这个方案还挺不错的，因为这种场景下，循环上几次或者几十次就能一次性获取转出账户和转入账户了。但是如果apply()操作耗时长，或者并发冲突量大的时候，循环等待这种方案就不适用了，因为在这种场景下，可能要循环上万次才能获取到锁，太消耗CPU了。</p><p>其实在这种场景下，最好的方案应该是：如果线程要求的条件（转出账本和转入账本同在文件架上）不满足，则线程阻塞自己，进入<strong>等待</strong>状态；当线程要求的条件（转出账本和转入账本同在文件架上）满足后，<strong>通知</strong>等待的线程重新执行。其中，使用线程阻塞的方式就能避免循环等待消耗CPU的问题。</p><p>那Java语言是否支持这种<strong>等待-通知机制</strong>呢？答案是：一定支持（毕竟占据排行榜第一那么久）。下面我们就来看看Java语言是如何支持<strong>等待-通知机制</strong>的。</p><h2>完美的就医流程</h2><p>在介绍Java语言如何支持等待-通知机制之前，我们先看一个现实世界里面的就医流程，因为它有着完善的等待-通知机制，所以对比就医流程，我们就能更好地理解和应用并发编程中的等待-通知机制。</p><!-- [[[read_end]]] --><p>就医流程基本上是这样：</p><ol>
+<li>患者先去挂号，然后到就诊门口分诊，等待叫号；</li>
+<li>当叫到自己的号时，患者就可以找大夫就诊了；</li>
+<li>就诊过程中，大夫可能会让患者去做检查，同时叫下一位患者；</li>
+<li>当患者做完检查后，拿检测报告重新分诊，等待叫号；</li>
+<li>当大夫再次叫到自己的号时，患者再去找大夫就诊。</li>
+</ol><p>或许你已经发现了，这个有着完美等待-通知机制的就医流程，不仅能够保证同一时刻大夫只为一个患者服务，而且还能够保证大夫和患者的效率。与此同时你可能也会有疑问，“这个就医流程很复杂呀，我们前面描述的等待-通知机制相较而言是不是太简单了？”那这个复杂度是否是必须的呢？这个是必须的，我们不能忽视等待-通知机制中的一些细节。</p><p>下面我们来对比看一下前面都忽视了哪些细节。</p><ol>
+<li>患者到就诊门口分诊，类似于线程要去获取互斥锁；当患者被叫到时，类似线程已经获取到锁了。</li>
+<li>大夫让患者去做检查（缺乏检测报告不能诊断病因），类似于线程要求的条件没有满足。</li>
+<li>患者去做检查，类似于线程进入等待状态；然后<strong>大夫叫下一个患者，这个步骤我们在前面的等待-通知机制中忽视了，这个步骤对应到程序里，本质是线程释放持有的互斥锁</strong>。</li>
+<li>患者做完检查，类似于线程要求的条件已经满足；<strong>患者拿检测报告重新分诊，类似于线程需要重新获取互斥锁，这个步骤我们在前面的等待-通知机制中也忽视了</strong>。</li>
+</ol><p>所以加上这些至关重要的细节，综合一下，就可以得出<strong>一个完整的等待-通知机制：线程首先获取互斥锁，当线程要求的条件不满足时，释放互斥锁，进入等待状态；当要求的条件满足时，通知等待的线程，重新获取互斥锁</strong>。</p><h2>用synchronized实现等待-通知机制</h2><p>在Java语言里，等待-通知机制可以有多种实现方式，比如Java语言内置的synchronized配合wait()、notify()、notifyAll()这三个方法就能轻松实现。</p><p>如何用synchronized实现互斥锁，你应该已经很熟悉了。在下面这个图里，左边有一个等待队列，同一时刻，只允许一个线程进入synchronized保护的临界区（这个临界区可以看作大夫的诊室），当有一个线程进入临界区后，其他线程就只能进入图中左边的等待队列里等待（相当于患者分诊等待）。<strong>这个等待队列和互斥锁是一对一的关系，每个互斥锁都有自己独立的等待队列。</strong></p><p><img src="https://static001.geekbang.org/resource/image/c6/d0/c6640129fde927be8882ca90981613d0.png" alt=""></p><center><span class="reference">wait()操作工作原理图</span></center><p>在并发程序中，当一个线程进入临界区后，由于某些条件不满足，需要进入等待状态，Java对象的wait()方法就能够满足这种需求。如上图所示，当调用wait()方法后，当前线程就会被阻塞，并且进入到右边的等待队列中，<strong>这个等待队列也是互斥锁的等待队列</strong>。 线程在进入等待队列的同时，<strong>会释放持有的互斥锁</strong>，线程释放锁后，其他线程就有机会获得锁，并进入临界区了。</p><p>那线程要求的条件满足时，该怎么通知这个等待的线程呢？很简单，就是Java对象的notify()和notifyAll()方法。我在下面这个图里为你大致描述了这个过程，当条件满足时调用notify()，会通知等待队列（<strong>互斥锁的等待队列</strong>）中的线程，告诉它<strong>条件曾经满足过</strong>。</p><p><img src="https://static001.geekbang.org/resource/image/1b/8c/1b3e999c300166a84f2e8cc7a4b8f78c.png" alt=""></p><center><span class="reference">notify()操作工作原理图</span></center><p>为什么说是曾经满足过呢？因为<strong>notify()只能保证在通知时间点，条件是满足的</strong>。而被通知线程的<strong>执行时间点和通知的时间点</strong>基本上不会重合，所以当线程执行的时候，很可能条件已经不满足了（保不齐有其他线程插队）。这一点你需要格外注意。</p><p>除此之外，还有一个需要注意的点，被通知的线程要想重新执行，仍然需要获取到互斥锁（因为曾经获取的锁在调用wait()时已经释放了）。</p><p>上面我们一直强调wait()、notify()、notifyAll()方法操作的等待队列是互斥锁的等待队列，所以如果synchronized锁定的是this，那么对应的一定是this.wait()、this.notify()、this.notifyAll()；如果synchronized锁定的是target，那么对应的一定是target.wait()、target.notify()、target.notifyAll() 。而且wait()、notify()、notifyAll()这三个方法能够被调用的前提是已经获取了相应的互斥锁，所以我们会发现wait()、notify()、notifyAll()都是在synchronized{}内部被调用的。如果在synchronized{}外部调用，或者锁定的this，而用target.wait()调用的话，JVM会抛出一个运行时异常：<code>java.lang.IllegalMonitorStateException</code>。</p><h2>小试牛刀：一个更好地资源分配器</h2><p>等待-通知机制的基本原理搞清楚后，我们就来看看它如何解决一次性申请转出账户和转入账户的问题吧。在这个等待-通知机制中，我们需要考虑以下四个要素。</p><ol>
+<li>互斥锁：上一篇文章我们提到Allocator需要是单例的，所以我们可以用this作为互斥锁。</li>
+<li>线程要求的条件：转出账户和转入账户都没有被分配过。</li>
+<li>何时等待：线程要求的条件不满足就等待。</li>
+<li>何时通知：当有线程释放账户时就通知。</li>
+</ol><p>将上面几个问题考虑清楚，可以快速完成下面的代码。需要注意的是我们使用了：</p><pre><code>  while(条件不满足) {
+    wait();
+  }
+</code></pre><p>利用这种范式可以解决上面提到的<strong>条件曾经满足过</strong>这个问题。因为当wait()返回时，有可能条件已经发生变化了，曾经条件满足，但是现在已经不满足了，所以要重新检验条件是否满足。范式，意味着是经典做法，所以没有特殊理由不要尝试换个写法。后面在介绍“管程”的时候，我会详细介绍这个经典做法的前世今生。</p><pre><code>class Allocator {
+  private List&lt;Object&gt; als;
+  // 一次性申请所有资源
+  synchronized void apply(
+    Object from, Object to){
+    // 经典写法
+    while(als.contains(from) ||
+         als.contains(to)){
+      try{
+        wait();
+      }catch(Exception e){
+      }   
+    } 
+    als.add(from);
+    als.add(to);  
+  }
+  // 归还资源
+  synchronized void free(
+    Object from, Object to){
+    als.remove(from);
+    als.remove(to);
+    notifyAll();
+  }
+}
+</code></pre><h2>尽量使用notifyAll()</h2><p>在上面的代码中，我用的是notifyAll()来实现通知机制，为什么不使用notify()呢？这二者是有区别的，<strong>notify()是会随机地通知等待队列中的一个线程，而notifyAll()会通知等待队列中的所有线程</strong>。从感觉上来讲，应该是notify()更好一些，因为即便通知所有线程，也只有一个线程能够进入临界区。但那所谓的感觉往往都蕴藏着风险，实际上使用notify()也很有风险，它的风险在于可能导致某些线程永远不会被通知到。</p><p>假设我们有资源A、B、C、D，线程1申请到了AB，线程2申请到了CD，此时线程3申请AB，会进入等待队列（AB分配给线程1，线程3要求的条件不满足），线程4申请CD也会进入等待队列。我们再假设之后线程1归还了资源AB，如果使用notify()来通知等待队列中的线程，有可能被通知的是线程4，但线程4申请的是CD，所以此时线程4还是会继续等待，而真正该唤醒的线程3就再也没有机会被唤醒了。</p><p>所以除非经过深思熟虑，否则尽量使用notifyAll()。</p><h2>总结</h2><p>等待-通知机制是一种非常普遍的线程间协作的方式。工作中经常看到有同学使用轮询的方式来等待某个状态，其实很多情况下都可以用今天我们介绍的等待-通知机制来优化。Java语言内置的synchronized配合wait()、notify()、notifyAll()这三个方法可以快速实现这种机制，但是它们的使用看上去还是有点复杂，所以你需要认真理解等待队列和wait()、notify()、notifyAll()的关系。最好用现实世界做个类比，这样有助于你的理解。</p><p>Java语言的这种实现，背后的理论模型其实是管程，这个很重要，不过你不用担心，后面会有专门的一章来介绍管程。现在你只需要能够熟练使用就可以了。</p><h2>课后思考</h2><p>很多面试都会问到，wait()方法和sleep()方法都能让当前线程挂起一段时间，那它们的区别是什么？现在你也试着回答一下吧。</p><p>欢迎在留言区与我分享你的想法，也欢迎你在留言区记录你的思考过程。感谢阅读，如果你觉得这篇文章对你有帮助的话，也欢迎把它分享给更多的朋友。</p><h1>猜你喜欢</h1><p><a href="https://time.geekbang.org/course/intro/156?utm_term=zeusRVDGT&amp;utm_source=app&amp;utm_medium=javabingfabiancheng&amp;utm_campaign=156-onsell&amp;utm_content=banner0301"><img src="https://static001.geekbang.org/resource/image/8e/93/8e1906fb8a24d5eb66539fa88ea56193.png" alt="unpreview"></a></p><h2>精选留言：</h2>
+        <ul>
+        
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            姜戈  2019-03-12 00:29:07
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            wait与sleep区别在于：<br>1. wait会释放所有锁而sleep不会释放锁资源.<br>2. wait只能在同步方法和同步块中使用，而sleep任何地方都可以.<br>3. wait无需捕捉异常，而sleep需要.<br><br>两者相同点：都会让渡CPU执行时间，等待再次调度！ [78赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Home  2019-03-12 07:11:19
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            补充一下姜戈同学回答；1 sleep是Thread的方法，而wait是Object类的方法；2：sleep方法调用的时候必须指定时间 [43赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            crazypokerk  2019-03-12 08:51:15
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            wait()方法与sleep()方法的不同之处在于，wait()方法会释放对象的“锁标志”。当调用某一对象的wait()方法后，会使当前线程暂停执行，并将当前线程放入对象等待池中，直到调用了notify()方法后，将从对象等待池中移出任意一个线程并放入锁标志等待池中，只有锁标志等待池中的线程可以获取锁标志，它们随时准备争夺锁的拥有权。当调用了某个对象的notifyAll()方法，会将对象等待池中的所有线程都移动到该对象的锁标志等待池。<br>sleep()方法需要指定等待的时间，它可以让当前正在执行的线程在指定的时间内暂停执行，进入阻塞状态，该方法既可以让其他同优先级或者高优先级的线程得到执行的机会，也可以让低优先级的线程得到执行机会。但是sleep()方法不会释放“锁标志”，也就是说如果有synchronized同步块，其他线程仍然不能访问共享数据。 [29赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 21:27:46</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            wang  2019-03-12 21:41:32
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            public class MyLock {<br>&#47;&#47; 测试转账的main方法<br>public static void main(String[] args) throws InterruptedException {<br>    Account src = new Account(10000);<br>    Account target = new Account(10000);<br>    CountDownLatch countDownLatch = new CountDownLatch(9999);<br>    for (int i = 0; i &lt; 9999; i++) {<br>        new Thread(()-&gt;{<br>            src.transactionToTarget(1,target);<br>        countDownLatch.countDown();<br>        }).start();<br>    }<br>    countDownLatch.await();<br>    System.out.println(&quot;src=&quot;+src.getBanalce() );<br>    System.out.println(&quot;target=&quot;+target.getBanalce() );<br>}<br>static class Account{ &#47;&#47;账户类<br>    public Account(Integer banalce) {<br>        this.banalce = banalce;<br>    }<br>    private Integer banalce;<br>    public void transactionToTarget(Integer money,Account target){&#47;&#47;转账方法<br>        Allocator.getInstance().apply(this,target);<br>        this.banalce -= money;<br>        target.setBanalce(target.getBanalce()+money);<br>        Allocator.getInstance().release(this,target);<br>    }<br>    public  Integer getBanalce() {<br>        return banalce;<br>    }<br>    public void setBanalce(Integer banalce) {<br>        this.banalce = banalce;<br>    }<br>}<br>static class Allocator { &#47;&#47;单例锁类<br>    private Allocator(){}<br>    private List&lt;Account&gt; locks = new ArrayList&lt;&gt;();<br>    public  synchronized void apply(Account src,Account tag){<br>        while (locks.contains(src)||locks.contains(tag)) {<br>            try {<br>                this.wait();<br>            } catch (InterruptedException e) {<br>            }<br>        }<br>        locks.add(src);<br>        locks.add(tag);<br>    }<br>    public synchronized void release(Account src,Account tag){<br>        locks.remove(src);<br>        locks.remove(tag);<br>        this.notifyAll();<br>    }<br>    public static  Allocator getInstance(){<br>        return AllocatorSingle.install;<br>    }<br>    static class AllocatorSingle{<br>        public static Allocator install = new Allocator();<br>    }<br>}<br>} [15赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-13 11:33:27</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">高手高手，让我写也这不这样好👍👍👍👍👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            蜡笔  2019-03-12 23:42:34
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师你不用在文章中贴出所有代码嘛，只贴出核心代码，然后把整个例子放在github上，文末的时候给出github的链接，水平基础一般的就可以去上面下载下来跑一跑调试加深印象理解，这样可以不老师😂 [10赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            郑晨Cc  2019-03-12 11:16:56
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            王老师 ABCD 那个例子真没看懂 线程1释放锁为啥会通知线程4？1和3才是互斥的啊 2和4互斥 按我的理解 3和4 不应该是在同一个等待队列里啊 因为不是通一把锁（准确来时不是同样的两把锁）<br>就着这个例子 我还有个关互斥锁的等待队列的问题 假设还是资源ABCD 线程5 获取AB 线程6获取CD 线程7试图获取AB 线程8试图获取BC 线程9试图获取CD 那线程 7，8，9 到底是不是在一个等待队列里面，<br>JVM在实现 wait notify机制是时候到底存不存在真实的队列？ [9赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 22:26:16</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">都是this这一把锁: synchronized void apply(){}<br>所以是一个等待队列<br><br>就是500个线程，也是同一个等待队列，因为锁的都是this<br><br>队列一定是存在的</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Geek_e726b7  2019-03-12 08:32:44
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            应该是!als.contains(from) || !als.contains(to)才wait()吧 [9赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            邋遢的流浪剑客  2019-03-12 03:30:24
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            wait会释放当前占有的锁，sleep不会释放锁 [9赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            虎虎❤️  2019-03-14 00:17:00
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            困惑<br>1. 对于从来没有获得过互斥锁的线程 所在的等待队列 和 因为wait() 释放锁而进入了等待队列，是否是同一个等待队列？也就是图中左侧和右侧的是否为同一个队列？<br>2. notifyAll() 会发通知给等待队列中所有的线程吗？包括那些从未获得过互斥锁的线程吗？<br>3. 因为wait()被阻塞，而又因为notify()重新被唤醒后，代码是接着在wait()之后执行，还是重新执行 apply 方法？ [8赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-14 08:44:01</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">不是一个队列<br>只唤醒右侧的队列<br>wait之后<br><br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            陈志凯  2019-03-13 16:31:06
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            public class Allocator {<br>	private final List&lt;Account&gt; als=new LinkedList&lt;Account&gt;();<br>	&#47;&#47; 一次性申请所有资源<br>	public synchronized void apply(Account from, Account to) {<br>		&#47;&#47; 经典写法<br>		while (als.contains(from) || als.contains(to)) {<br>			try {<br>				System.out.println(&quot;等待用户 -&gt; &quot;+from.getId()+&quot;_&quot;+to.getId());<br>				wait();<br>			} catch (Exception e) {<br>				&#47;&#47;notify + notifyAll 不会来这里<br>				System.out.println(&quot;异常用户 -&gt; &quot;+from.getId()+&quot;_&quot;+to.getId());<br>				e.printStackTrace();<br>			}<br>		}<br>		als.add(from);<br>		als.add(to);<br>	}<br>	&#47;&#47; 归还资源<br>	public synchronized void free(Account from, Account to) {<br>		System.out.println(&quot;唤醒用户 -&gt; &quot;+from.getId()+&quot;_&quot;+to.getId());<br>		als.remove(from);<br>		als.remove(to);<br>		notifyAll();<br>	}<br>}<br><br>public class Account {<br>	&#47;&#47; actr 应该为单例<br>	private final Allocator actr;<br>	&#47;&#47;唯一账号<br>	private final long id;<br>	&#47;&#47;余额<br>	private int balance;<br>	public Account(Allocator actr,long id,int balance){<br>		this.actr=actr;<br>		this.id=id;<br>		this.balance=balance;<br>	}<br>	&#47;&#47; 转账<br>	public void transfer(Account target, int amt) {<br>		&#47;&#47; 一次性申请转出账户和转入账户，直到成功<br>		actr.apply(this, target);<br>		try {<br>			&#47;&#47;TODO 有了资源管理器，这里的synchronized锁就不需要了吧？！<br>					if (this.balance &gt; amt) {<br>						this.balance -= amt;<br>						target.balance += amt;<br>					}<br>					&#47;&#47;模拟数据库操作时间<br>					try {<br>						Thread.sleep(new Random().nextInt(2000));<br>					} catch (InterruptedException e) {<br>						e.printStackTrace();<br>					}<br>		} finally {<br>			actr.free(this, target);<br>		}<br>	}<br>	@Override<br>	public int hashCode() {<br>		final int prime = 31;<br>		int result = 1;<br>		result = prime * result + (int) (id ^ (id &gt;&gt;&gt; 32));<br>		return result;<br>	}<br>	&#47;**<br>	 * 用于判断两个用户是否一致<br>	 *&#47;<br>	@Override<br>	public boolean equals(Object obj) {<br>		if (this == obj)<br>			return true;<br>		if (obj == null)<br>			return false;<br>		if (getClass() != obj.getClass())<br>			return false;<br>		Account other = (Account) obj;<br>		if (id != other.id)<br>			return false;<br>		return true;<br>	}<br>	public long getId() {<br>		return id;<br>	}<br>}<br>老师，以上代码是我补的，有个疑问，以上有了Allocator管理器（见TODO部分），transfer方法的this跟target都不再需要加synchronized锁了吧？！ [6赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-13 20:25:58</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">如果只是这个例子就不需要了，<br>送你俩字！优秀！！！！！</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            老杨同志  2019-03-12 20:42:44
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            点赞@姜戈 补充一下：wait与sleep区别在于：<br>1. wait会释放所有锁而sleep不会释放锁资源.<br>2. wait只能在同步方法和同步块中使用，而sleep任何地方都可以.<br>3. wait无需捕捉异常，而sleep需要.（都抛出InterruptedException ，wait也需要捕获异常）<br>4. wait()无参数需要唤醒，线程状态WAITING；wait(1000L);到时间自己醒过来或者到时间之前被其他线程唤醒，状态和sleep都是TIME_WAITING<br>两者相同点：都会让渡CPU执行时间，等待再次调度！ [6赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 21:17:19</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            我是卖报小行家  2019-03-12 16:58:47
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            wait和sleep区别<br>1：wait释放资源，sleep不释放资源<br>2：wait需要被唤醒，sleep不需要<br>3：wait需要获取到监视器，否则抛异常，sleep不需要<br>4：wait是object顶级父类的方法，sleep则是Thread的方法 [6赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 21:16:17</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">全面👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            陈志凯  2019-03-12 15:36:48
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            强烈建议老师每个章节配上完整的demo，包括模拟多线程多个客户操作的代码，这样看效果才是最佳的，我们自己也能根据代码实际好好观察！ [5赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 20:39:31</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">对于水平高的，完整的代码没必要。对于水平低的，完整的代码只能增加惰性。我就很讨厌粘贴一些无关的代码😃</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            aksonic  2019-03-14 23:56:19
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师，我昨天问了你问题后，带着疑问又去学习了下，是不是文章中的左边和右边的两个队列应该改一改名字，不应该都叫等待队列，这样对新手很容易产生误解。如果左边的叫做同步队列，右边的叫做等待队列可能更好。左边的队列是用来争夺锁的，右边的队列是等待队列，是必须被notify的，当被notify之后，就会被放入左边的队列去争夺锁。老师，你觉得呢？ [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-15 12:24:48</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">你这个建议挺好，在管程里面，会重新讲这俩队列。现在就知道有俩等待队列就可以了<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            高源  2019-03-12 10:33:07
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师最好讲解每一章的时候配合完整的例子源代码，这样再加调试源代码，印象更深刻了 [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 11:53:55</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">大家水平不一样，有些高水平的可能只想看到核心的代码，我怕贴多了，有人说浪费流量。自己补上剩余代码也是个不错的提高机会吧😂</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            郭瑞娟  2019-04-02 21:21:50
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            之前老师答复问题时，提到wait和notify是一一对应的，如果浪费了一个notify，就必然有一个wait永远没机会被唤醒。这句话怎么理解呢？<br>例子里面 假设之后线程 1 归还了资源 AB，使用 notify() 来通知等待队列中的线程4 申请的是 CD，程 4 还是会继续等待，此时会执行wait()吗？如果执行了，wait和notify还是一一对应的呀。如果没有执行，线程4会怎么执行呢？我看了几次文章了，还是没有理解此处，请老师帮忙，谢谢。<br> [3赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-04-02 22:38:19</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">因为不对应了，所以就死等下去了，有借有还才行，还错了人就出问题了<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            lau  2019-03-14 17:58:49
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            看评论也能学到很多干货 [3赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            San D Ji  2019-03-12 21:06:11
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            学习这几章以后，我一直有一个问题，Javaweb端在什么样的业务场景下需要多线程的技术实现？<br>一直以为Javaweb端都是接收到一个请求服务器端开启一条线程独立作业，完了之后就返回一个应答。<br>不知道老师能否回答一下我的疑问？ [3赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 21:20:43</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">比如你要做个数据库连接池，做个httpclient，做个rpc框架，用批处理处理上千万数据，一个简单的crud真的用不上<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            ^_^  2019-03-12 13:47:24
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师，while(als.contains(from) || als.contains(to)) 这句对吗 [3赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 20:22:38</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我确认了一下，应该是对的<br>只要有一个，就说明曾经被分配过<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            狂战俄洛伊  2019-03-12 08:49:46
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            Sleep是睡一段时间就自己起来了，wait的话得等到别人叫醒他。个人感觉sleep除了增加程序运行时间以外，没别的意义呀 [3赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-12 21:23:44</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">有用，例如别让程序跑的太快</div>
+</div>
+            
+    </div>
+</li>
+            </ul>
+</div>
+</body>
+</html>

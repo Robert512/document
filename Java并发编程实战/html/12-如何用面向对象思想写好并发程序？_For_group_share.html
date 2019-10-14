@@ -1,0 +1,1298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>12-如何用面向对象思想写好并发程序？</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <style>
+        html {
+            color: #333;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-rendering: optimizelegibility;
+            font-family: Helvetica Neue, PingFang SC, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif
+        }
+
+        html.borderbox *,
+        html.borderbox :after,
+        html.borderbox :before {
+            box-sizing: border-box
+        }
+
+        article,
+        aside,
+        blockquote,
+        body,
+        button,
+        code,
+        dd,
+        details,
+        dl,
+        dt,
+        fieldset,
+        figcaption,
+        figure,
+        footer,
+        form,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        header,
+        hr,
+        input,
+        legend,
+        li,
+        menu,
+        nav,
+        ol,
+        p,
+        pre,
+        section,
+        td,
+        textarea,
+        th,
+        ul {
+            margin: 0;
+            padding: 0
+        }
+
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        menu,
+        nav,
+        section {
+            display: block
+        }
+
+        audio,
+        canvas,
+        video {
+            display: inline-block
+        }
+
+        body,
+        button,
+        input,
+        select,
+        textarea {
+            font: 300 1em/1.8 PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, Helvetica, sans-serif
+        }
+
+        button::-moz-focus-inner,
+        input::-moz-focus-inner {
+            padding: 0;
+            border: 0
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0
+        }
+
+        fieldset,
+        img {
+            border: 0
+        }
+
+        blockquote {
+            position: relative;
+            color: #999;
+            font-weight: 400;
+            border-left: 1px solid #1abc9c;
+            padding-left: 1em;
+            margin: 1em 3em 1em 2em
+        }
+
+        @media only screen and (max-width: 640px) {
+            blockquote {
+                margin: 1em 0
+            }
+        }
+
+        abbr,
+        acronym {
+            border-bottom: 1px dotted;
+            font-variant: normal
+        }
+
+        abbr {
+            cursor: help
+        }
+
+        del {
+            text-decoration: line-through
+        }
+
+        address,
+        caption,
+        cite,
+        code,
+        dfn,
+        em,
+        th,
+        var {
+            font-style: normal;
+            font-weight: 400
+        }
+
+        ol,
+        ul {
+            list-style: none
+        }
+
+        caption,
+        th {
+            text-align: left
+        }
+
+        q:after,
+        q:before {
+            content: ""
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative
+        }
+
+        :root sub,
+        :root sup {
+            vertical-align: baseline
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        a {
+            color: #1abc9c
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        .typo a {
+            border-bottom: 1px solid #1abc9c
+        }
+
+        .typo a:hover {
+            border-bottom-color: #555;
+            color: #555
+        }
+
+        .typo a:hover,
+        a,
+        ins {
+            text-decoration: none
+        }
+
+        .typo-u,
+        u {
+            text-decoration: underline
+        }
+
+        mark {
+            background: #fffdd1;
+            border-bottom: 1px solid #ffedce;
+            padding: 2px;
+            margin: 0 5px
+        }
+
+        code,
+        pre,
+        pre tt {
+            font-family: Courier, Courier New, monospace
+        }
+
+        pre {
+            background: hsla(0, 0%, 97%, .7);
+            border: 1px solid #ddd;
+            padding: 1em 1.5em;
+            display: block;
+            -webkit-overflow-scrolling: touch
+        }
+
+        hr {
+            border: none;
+            border-bottom: 1px solid #cfcfcf;
+            margin-bottom: .8em;
+            height: 10px
+        }
+
+        .typo-small,
+        figcaption,
+        small {
+            font-size: .9em;
+            color: #888
+        }
+
+        b,
+        strong {
+            font-weight: 700;
+            color: #000
+        }
+
+        [draggable] {
+            cursor: move
+        }
+
+        .clearfix:after,
+        .clearfix:before {
+            content: "";
+            display: table
+        }
+
+        .clearfix:after {
+            clear: both
+        }
+
+        .clearfix {
+            zoom: 1
+        }
+
+        .textwrap,
+        .textwrap td,
+        .textwrap th {
+            word-wrap: break-word;
+            word-break: break-all
+        }
+
+        .textwrap-table {
+            table-layout: fixed
+        }
+
+        .serif {
+            font-family: Palatino, Optima, Georgia, serif
+        }
+
+        .typo-dl,
+        .typo-form,
+        .typo-hr,
+        .typo-ol,
+        .typo-p,
+        .typo-pre,
+        .typo-table,
+        .typo-ul,
+        .typo dl,
+        .typo form,
+        .typo hr,
+        .typo ol,
+        .typo p,
+        .typo pre,
+        .typo table,
+        .typo ul,
+        blockquote {
+            margin-bottom: 1rem
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: PingFang SC, Helvetica Neue, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
+            color: #000;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo-h2,
+        .typo-h3,
+        .typo-h4,
+        .typo-h5,
+        .typo-h6,
+        .typo h1,
+        .typo h2,
+        .typo h3,
+        .typo h4,
+        .typo h5,
+        .typo h6 {
+            margin-top: 1.2em;
+            margin-bottom: .6em;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo h1 {
+            font-size: 2em
+        }
+
+        .typo-h2,
+        .typo h2 {
+            font-size: 1.8em
+        }
+
+        .typo-h3,
+        .typo h3 {
+            font-size: 1.6em
+        }
+
+        .typo-h4,
+        .typo h4 {
+            font-size: 1.4em
+        }
+
+        .typo-h5,
+        .typo-h6,
+        .typo h5,
+        .typo h6 {
+            font-size: 1.2em
+        }
+
+        .typo-ul,
+        .typo ul {
+            margin-left: 1.3em;
+            list-style: disc
+        }
+
+        .typo-ol,
+        .typo ol {
+            list-style: decimal;
+            margin-left: 1.9em
+        }
+
+        .typo-ol ol,
+        .typo-ol ul,
+        .typo-ul ol,
+        .typo-ul ul,
+        .typo li ol,
+        .typo li ul {
+            margin-bottom: .8em;
+            margin-left: 2em
+        }
+
+        .typo-ol ul,
+        .typo-ul ul,
+        .typo li ul {
+            list-style: circle
+        }
+
+        .typo-table td,
+        .typo-table th,
+        .typo table caption,
+        .typo table td,
+        .typo table th {
+            border: 1px solid #ddd;
+            padding: .5em 1em;
+            color: #666
+        }
+
+        .typo-table th,
+        .typo table th {
+            background: #fbfbfb
+        }
+
+        .typo-table thead th,
+        .typo table thead th {
+            background: hsla(0, 0%, 95%, .7)
+        }
+
+        .typo table caption {
+            border-bottom: none
+        }
+
+        .typo-input,
+        .typo-textarea {
+            -webkit-appearance: none;
+            border-radius: 0
+        }
+
+        .typo-em,
+        .typo em,
+        caption,
+        legend {
+            color: #000;
+            font-weight: inherit
+        }
+
+        .typo-em {
+            position: relative
+        }
+
+        .typo-em:after {
+            position: absolute;
+            top: .65em;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            content: "\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB"
+        }
+
+        .typo img {
+            max-width: 100%
+        }
+
+        .common-content {
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.75rem;
+            white-space: normal;
+            word-break: normal;
+            font-size: 1rem
+        }
+
+        .common-content img {
+            display: block;
+            max-width: 100%;
+            background-color: #eee
+        }
+
+        .common-content audio,
+        .common-content video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        .common-content center,
+        .common-content font {
+            margin-top: 1rem;
+            display: inline-block
+        }
+
+        .common-content center {
+            width: 100%
+        }
+
+        .common-content pre {
+            margin-top: 1rem;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            overflow: hidden
+        }
+
+        .common-content pre code {
+            font-size: .8rem;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            overflow-x: auto
+        }
+
+        .common-content hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        .common-content b,
+        .common-content h1,
+        .common-content h2,
+        .common-content h3,
+        .common-content h4,
+        .common-content h5,
+        .common-content strong {
+            font-weight: 700
+        }
+
+        .common-content h1,
+        .common-content h2 {
+            font-size: 1.125rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content h3,
+        .common-content h4,
+        .common-content h5 {
+            font-size: 1rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: .15rem
+        }
+
+        .common-content .orange {
+            color: #ff5a05
+        }
+
+        .common-content .reference {
+            font-size: 1rem;
+            color: #888
+        }
+
+        .custom-rich-content h1 {
+            margin-top: 0;
+            font-weight: 400;
+            font-size: 15.25px;
+            border-bottom: 1px solid #eee;
+            line-height: 2.8
+        }
+
+        .custom-rich-content li,
+        .custom-rich-content p {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6
+        }
+
+        table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        table.hljs-ln,
+        table.hljs-ln tbody,
+        table.hljs-ln td,
+        table.hljs-ln tr {
+            box-sizing: border-box
+        }
+
+        table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none
+        }
+
+        table.hljs-ln td.hljs-ln-code,
+        table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            font-size: 12px;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            color: #24292e;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+        video::-webkit-media-controls {
+            overflow: hidden !important
+        }
+
+        video::-webkit-media-controls-enclosure {
+            width: calc(100% + 32px);
+            margin-left: auto
+        }
+
+        ._29HP61GA_0 {
+            max-width:800px;
+            margin:0 auto;
+            margin-bottom: 20px;
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.76;
+            white-space: normal;
+            word-break: normal;
+            font-size: 17px;
+            -webkit-transition: background-color .3s ease;
+            transition: background-color .3s ease
+        }
+
+        ._29HP61GA_0 .MathJax_Display {
+            overflow: auto
+        }
+
+        ._29HP61GA_0 .poster {
+            position: fixed;
+            left: -10000px;
+            top: -10000px;
+            overflow: hidden;
+            padding: 1rem;
+            background: #ececec
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy {
+            font-size: 13px;
+            color: #888;
+            position: absolute;
+            right: 1em;
+            top: .5em;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy .iconfont {
+            font-size: 12px;
+            margin-right: .2em
+        }
+
+        ._29HP61GA_0 a {
+            color: #fa8919;
+            border-bottom: 1px solid #fa8919
+        }
+
+        ._29HP61GA_0 img {
+            display: block;
+            max-width: 100%;
+            position: relative;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            background-color: #eee;
+            vertical-align: top;
+            border-radius: 0
+        }
+
+        ._29HP61GA_0 audio,
+        ._29HP61GA_0 video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        ._29HP61GA_0 pre {
+            margin-top: 16px;
+            padding: 34px 0 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-radius: 6px;
+            background: rgba(246, 247, 251, .749);
+            border: 0
+        }
+
+        ._29HP61GA_0 pre code {
+            font-size: 12px;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-left: 16px;
+            margin-right: 16px;
+            overflow-x: scroll
+        }
+
+        ._29HP61GA_0 pre code:after {
+            content: "";
+            height: 30px;
+            width: 100%;
+            display: block
+        }
+
+        ._29HP61GA_0 hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        ._29HP61GA_0 h1,
+        ._29HP61GA_0 h2,
+        ._29HP61GA_0 h3,
+        ._29HP61GA_0 h4,
+        ._29HP61GA_0 h5 {
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 b,
+        ._29HP61GA_0 strong {
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 h1 {
+            font-size: 21px
+        }
+
+        ._29HP61GA_0 h2 {
+            font-size: 20px
+        }
+
+        ._29HP61GA_0 h3 {
+            font-size: 19px
+        }
+
+        ._29HP61GA_0 h4 {
+            font-size: 18px
+        }
+
+        ._29HP61GA_0 h5 {
+            font-size: 17px
+        }
+
+        ._29HP61GA_0 center,
+        ._29HP61GA_0 p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: 0;
+            margin-bottom: 30px;
+            word-break: break-word
+        }
+
+        ._29HP61GA_0 center {
+            text-align: center
+        }
+
+        ._29HP61GA_0 blockquote {
+            margin-top: 0;
+            margin-bottom: 34px;
+            border-left: 3px solid #e8e8e8;
+            padding-left: 17px;
+            color: #353535
+        }
+
+        ._29HP61GA_0 blockquote p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol,
+        ._29HP61GA_0 ul {
+            margin-bottom: 30px
+        }
+
+        ._29HP61GA_0 ol p,
+        ._29HP61GA_0 ul p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol {
+            list-style: decimal;
+            margin-left: 20px
+        }
+
+        ._29HP61GA_0 ul li {
+            padding-left: 17px;
+            position: relative;
+            margin-bottom: 10px
+        }
+
+        ._29HP61GA_0 ul li:after {
+            content: "";
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            background: #353535;
+            position: absolute;
+            top: 10px;
+            left: 0
+        }
+
+        ._29HP61GA_0 .orange {
+            color: #fa8919
+        }
+
+        ._29HP61GA_0 .reference {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-right {
+            text-align: right
+        }
+
+        ._29HP61GA_0 .m-center {
+            text-align: center;
+            display: block
+        }
+
+        ._29HP61GA_0 .m-gray {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-small {
+            font-size: 15px
+        }
+
+        ._29HP61GA_0 table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        ._29HP61GA_0 table.hljs-ln,
+        ._29HP61GA_0 table.hljs-ln tbody,
+        ._29HP61GA_0 table.hljs-ln td,
+        ._29HP61GA_0 table.hljs-ln tr {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box
+        }
+
+        ._29HP61GA_0 table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            font-size: 12px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code,
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            font-size: 13px;
+            color: #666;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+    </style>
+</head>
+<body>
+<div class="_29HP61GA_0">
+<h1>12-如何用面向对象思想写好并发程序？</h1>
+<p>在工作中，我发现很多同学在设计之初都是直接按照单线程的思路来写程序的，而忽略了本应该重视的并发问题；等上线后的某天，突然发现诡异的Bug，再历经千辛万苦终于定位到问题所在，却发现对于如何解决已经没有了思路。</p><p>关于这个问题，我觉得咱们今天很有必要好好聊聊“如何用面向对象思想写好并发程序”这个话题。</p><p>面向对象思想与并发编程有关系吗？本来是没关系的，它们分属两个不同的领域，但是在Java语言里，这两个领域被无情地融合在一起了，好在融合的效果还是不错的：<strong>在Java语言里，面向对象思想能够让并发编程变得更简单</strong>。</p><p>那如何才能用面向对象思想写好并发程序呢？结合我自己的工作经验来看，我觉得你可以从封装共享变量、识别共享变量间的约束条件和制定并发访问策略这三个方面下手。</p><h2>一、封装共享变量</h2><p>并发程序，我们关注的一个核心问题，不过是解决多线程同时访问共享变量的问题。在<a href="https://time.geekbang.org/column/article/84344">《03 | 互斥锁（上）：解决原子性问题》</a>中，我们类比过球场门票的管理，现实世界里门票管理的一个核心问题是：所有观众只能通过规定的入口进入，否则检票就形同虚设。在编程世界这个问题也很重要，编程领域里面对于共享变量的访问路径就类似于球场的入口，必须严格控制。好在有了面向对象思想，对共享变量的访问路径可以轻松把控。</p><!-- [[[read_end]]] --><p>面向对象思想里面有一个很重要的特性是<strong>封装</strong>，封装的通俗解释就是<strong>将属性和实现细节封装在对象内部</strong>，外界对象<strong>只能通过</strong>目标对象提供的<strong>公共方法来间接访问</strong>这些内部属性，这和门票管理模型匹配度相当的高，球场里的座位就是对象属性，球场入口就是对象的公共方法。我们把共享变量作为对象的属性，那对于共享变量的访问路径就是对象的公共方法，所有入口都要安排检票程序就相当于我们前面提到的并发访问策略。</p><p>利用面向对象思想写并发程序的思路，其实就这么简单：<strong>将共享变量作为对象属性封装在内部，对所有公共方法制定并发访问策略</strong>。就拿很多统计程序都要用到计数器来说，下面的计数器程序共享变量只有一个，就是value，我们把它作为Counter类的属性，并且将两个公共方法get()和addOne()声明为同步方法，这样Counter类就成为一个线程安全的类了。</p><pre><code>public class Counter {
+  private long value;
+  synchronized long get(){
+    return value;
+  }
+  synchronized long addOne(){
+    return ++value;
+  }
+}
+</code></pre><p>当然，实际工作中，很多的场景都不会像计数器这么简单，经常要面临的情况往往是有很多的共享变量，例如，信用卡账户有卡号、姓名、身份证、信用额度、已出账单、未出账单等很多共享变量。这么多的共享变量，如果每一个都考虑它的并发安全问题，那我们就累死了。但其实仔细观察，你会发现，很多共享变量的值是不会变的，例如信用卡账户的卡号、姓名、身份证。<strong>对于这些不会发生变化的共享变量，建议你用final关键字来修饰</strong>。这样既能避免并发问题，也能很明了地表明你的设计意图，让后面接手你程序的兄弟知道，你已经考虑过这些共享变量的并发安全问题了。</p><h2>二、识别共享变量间的约束条件</h2><p>识别共享变量间的约束条件非常重要。因为<strong>这些约束条件，决定了并发访问策略</strong>。例如，库存管理里面有个合理库存的概念，库存量不能太高，也不能太低，它有一个上限和一个下限。关于这些约束条件，我们可以用下面的程序来模拟一下。在类SafeWM中，声明了两个成员变量upper和lower，分别代表库存上限和库存下限，这两个变量用了AtomicLong这个原子类，原子类是线程安全的，所以这两个成员变量的set方法就不需要同步了。</p><pre><code>public class SafeWM {
+  // 库存上限
+  private final AtomicLong upper =
+        new AtomicLong(0);
+  // 库存下限
+  private final AtomicLong lower =
+        new AtomicLong(0);
+  // 设置库存上限
+  void setUpper(long v){
+    upper.set(v);
+  }
+  // 设置库存下限
+  void setLower(long v){
+    lower.set(v);
+  }
+  // 省略其他业务代码
+}
+</code></pre><p>虽说上面的代码是没有问题的，但是忽视了一个约束条件，就是<strong>库存下限要小于库存上限</strong>，这个约束条件能够直接加到上面的set方法上吗？我们先直接加一下看看效果（如下面代码所示）。我们在setUpper()和setLower()中增加了参数校验，这乍看上去好像是对的，但其实存在并发问题，问题在于存在竞态条件。这里我顺便插一句，其实当你看到代码里出现if语句的时候，就应该立刻意识到可能存在竞态条件。</p><p>我们假设库存的下限和上限分别是(2,10)，线程A调用setUpper(5)将上限设置为5，线程B调用setLower(7)将下限设置为7，如果线程A和线程B完全同时执行，你会发现线程A能够通过参数校验，因为这个时候，下限还没有被线程B设置，还是2，而5&gt;2；线程B也能够通过参数校验，因为这个时候，上限还没有被线程A设置，还是10，而7&lt;10。当线程A和线程B都通过参数校验后，就把库存的下限和上限设置成(7, 5)了，显然此时的结果是不符合<strong>库存下限要小于库存上限</strong>这个约束条件的。</p><pre><code>public class SafeWM {
+  // 库存上限
+  private final AtomicLong upper =
+        new AtomicLong(0);
+  // 库存下限
+  private final AtomicLong lower =
+        new AtomicLong(0);
+  // 设置库存上限
+  void setUpper(long v){
+    // 检查参数合法性
+    if (v &lt; lower.get()) {
+      throw new IllegalArgumentException();
+    }
+    upper.set(v);
+  }
+  // 设置库存下限
+  void setLower(long v){
+    // 检查参数合法性
+    if (v &gt; upper.get()) {
+      throw new IllegalArgumentException();
+    }
+    lower.set(v);
+  }
+  // 省略其他业务代码
+}
+</code></pre><p>在没有识别出<strong>库存下限要小于库存上限</strong>这个约束条件之前，我们制定的并发访问策略是利用原子类，但是这个策略，完全不能保证<strong>库存下限要小于库存上限</strong>这个约束条件。所以说，在设计阶段，我们<strong>一定要识别出所有共享变量之间的约束条件，如果约束条件识别不足，很可能导致制定的并发访问策略南辕北辙</strong>。</p><p>共享变量之间的约束条件，反映在代码里，基本上都会有if语句，所以，一定要特别注意竞态条件。</p><h2>三、制定并发访问策略</h2><p>制定并发访问策略，是一个非常复杂的事情。应该说整个专栏都是在尝试搞定它。不过从方案上来看，无外乎就是以下“三件事”。</p><ol>
+<li>避免共享：避免共享的技术主要是利于线程本地存储以及为每个任务分配独立的线程。</li>
+<li>不变模式：这个在Java领域应用的很少，但在其他领域却有着广泛的应用，例如Actor模式、CSP模式以及函数式编程的基础都是不变模式。</li>
+<li>管程及其他同步工具：Java领域万能的解决方案是管程，但是对于很多特定场景，使用Java并发包提供的读写锁、并发容器等同步工具会更好。</li>
+</ol><p>接下来在咱们专栏的第二模块我会仔细讲解Java并发工具类以及他们的应用场景，在第三模块我还会讲解并发编程的设计模式，这些都是和制定并发访问策略有关的。</p><p>除了这些方案之外，还有一些宏观的原则需要你了解。这些宏观原则，有助于你写出“健壮”的并发程序。这些原则主要有以下三条。</p><ol>
+<li>优先使用成熟的工具类：Java SDK并发包里提供了丰富的工具类，基本上能满足你日常的需要，建议你熟悉它们，用好它们，而不是自己再“发明轮子”，毕竟并发工具类不是随随便便就能发明成功的。</li>
+<li>迫不得已时才使用低级的同步原语：低级的同步原语主要指的是synchronized、Lock、Semaphore等，这些虽然感觉简单，但实际上并没那么简单，一定要小心使用。</li>
+<li>避免过早优化：安全第一，并发程序首先要保证安全，出现性能瓶颈后再优化。在设计期和开发期，很多人经常会情不自禁地预估性能的瓶颈，并对此实施优化，但残酷的现实却是：性能瓶颈不是你想预估就能预估的。</li>
+</ol><h2>总结</h2><p>利用面向对象思想编写并发程序，一个关键点就是利用面向对象里的封装特性，由于篇幅原因，这里我只做了简单介绍，详细的你可以借助相关资料定向学习。而对共享变量进行封装，要避免“逸出”，所谓“逸出”简单讲就是共享变量逃逸到对象的外面，比如在<a href="https://time.geekbang.org/column/article/84017">《02 | Java内存模型：看Java如何解决可见性和有序性问题》</a>那一篇我们已经讲过构造函数里的this“逸出”。这些都是必须要避免的。</p><p>这是我们专栏并发理论基础的最后一部分内容，这一部分内容主要是让你对并发编程有一个全面的认识，让你了解并发编程里的各种概念，以及它们之间的关系，当然终极目标是让你知道遇到并发问题该怎么思考。这部分的内容还是有点烧脑的，但专栏后面几个模块的内容都是具体的实践部分，相对来说就容易多了。我们一起坚持吧！</p><h2>课后思考</h2><p>本期示例代码中，类SafeWM不满足库存下限要小于库存上限这个约束条件，那你来试试修改一下，让它能够在并发条件下满足库存下限要小于库存上限这个约束条件。</p><p>欢迎在留言区与我分享你的想法，也欢迎你在留言区记录你的思考过程。感谢阅读，如果你觉得这篇文章对你有帮助的话，也欢迎把它分享给更多的朋友。</p><h2>延伸阅读</h2><p>关于这部分的内容，如果你觉得还不“过瘾”，这里我再给你推荐一本书吧——<a href="https://h5.youzan.com/v2/goods/2758xqdzr6uuw">《Java并发编程实战》</a>，这本书的第三章《对象的共享》、第四章《对象的组合》全面地介绍了如何构建线程安全的对象，你可以拿来深入地学习。</p><h1>猜你喜欢</h1><p><a href="https://time.geekbang.org/course/intro/156?utm_term=zeusRVDGT&amp;utm_source=app&amp;utm_medium=javabingfabiancheng&amp;utm_campaign=156-onsell&amp;utm_content=banner0301"><img src="https://static001.geekbang.org/resource/image/8e/93/8e1906fb8a24d5eb66539fa88ea56193.png" alt="unpreview"></a></p><h2>精选留言：</h2>
+        <ul>
+        
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            海鸿  2019-03-26 21:25:53
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            我看有些人评论用volatie，volatie只能保证可见性，但是保证不了原子性，所以得加锁保证互斥。<br>老师我这样理解对吗？ [10赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-27 08:39:14</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">相当正确！<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            QQ怪  2019-03-27 18:37:21
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            必须加锁啊，synchronized (this)就行了，最简单加锁吧，volatile只能保证内存可见性，并不能保证原子性 [6赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-27 21:39:19</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            抽离の❤️  2019-03-26 08:04:50
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师、讲的真好！ [3赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            无庸  2019-03-26 07:52:17
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            compareAndSet吧<br><br>void setUpper（long v）{<br>  upper.compareAndSet(upper.longValue<br>(),v);<br>} [3赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-26 09:07:46</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">不满足合理库存的约束条件<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            悟空  2019-03-26 14:21:37
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            访问时使用syncchronize对类加锁。保证变量访问的互斥 [2赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-26 20:53:56</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">对象加锁就可以了<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Lemon  2019-03-26 10:47:24
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            使用 Condition<br>public class SafeWM {<br><br>    &#47;&#47; 库存上限<br>    private final AtomicLong upper =<br>            new AtomicLong(10);<br>    &#47;&#47; 库存下限<br>    private final AtomicLong lower =<br>            new AtomicLong(2);<br><br>    private ReentrantLock lock = new ReentrantLock();<br>    private Condition c1 = lock.newCondition();<br>    private Condition c2 = lock.newCondition();<br>    <br>    &#47;&#47; 设置库存上限<br>    void setUpper(long v) {<br>        try {<br>            lock.lock();<br>            &#47;&#47; 检查参数合法性<br>            while (v &lt; lower.get()) {<br>                c1.await();<br>            }<br>            upper.set(v);<br>            c2.signal();<br>        } catch (Exception e) {<br>            e.printStackTrace();<br>        } finally {<br>            lock.unlock();<br>        }<br><br>    }<br><br>    &#47;&#47; 设置库存下限<br>    void setLower(long v) {<br><br>        try {<br>            lock.lock();<br>            &#47;&#47; 检查参数合法性<br>            while (v &gt; upper.get())  {<br>                c2.await();<br>            }<br>            lower.set(v);<br>            c1.signal();<br>        } catch (Exception e) {<br>            e.printStackTrace();<br>        } finally {<br>            lock.unlock();<br>        }<br>    }<br><br>} [2赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-26 11:39:01</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">错误的设置会导致永远等待，太危险了<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Zm  2019-03-26 09:08:24
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            Volatile修饰变量 [2赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            京  2019-03-26 07:15:33
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            一早起来，就把文章看完了，期待老师后面更精彩的内容 [2赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            逆水行舟  2019-03-31 08:30:13
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            那本书，有些晦涩，但是是必读的。 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-31 19:13:32</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">太晦涩了</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Cc  2019-03-29 14:49:55
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            又想到一种，既然两个变量要同时锁定，那就把两个变量封装成一个，然后使用cas操作。这样行不行，另外老师帮我看看volatile是不是有多余的地方<br>···········<br>volatile AtomicReference&lt;Inventory&gt; inventory = new AtomicReference&lt;&gt;();<br><br>    static class Inventory {<br>        private volatile long upper = 0;<br><br>        private volatile long lower = 0;<br>    }<br><br>    void setUpper(long v) {<br>        long low;<br>        Inventory oldObj;<br>        Inventory newObj;<br>        do {<br>            oldObj = inventory.get();<br>            if (v &gt;= (low = oldObj.lower)) {<br>                throw new IllegalArgumentException();<br>            }<br>            newObj = new Inventory();<br>            newObj.lower = low;<br>            newObj.upper = v;<br><br>        } while (inventory.compareAndSet(oldObj, newObj));<br>    }<br><br>    void setLower(long v) {<br>        long upp;<br>        Inventory oldObj;<br>        Inventory newObj;<br>        do {<br>            oldObj = inventory.get();<br>            if (v &lt;= (upp = oldObj.upper)) {<br>                throw new IllegalArgumentException();<br>            }<br>            newObj = new Inventory();<br>            newObj.lower = v;<br>            newObj.upper = upp;<br><br>        } while (inventory.compareAndSet(oldObj, newObj));<br>    }<br><br><br> [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-30 08:49:05</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我觉得这个没有问题，volatile 换成 final会更好</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            magict4  2019-03-26 11:29:21
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            1. setUpper() 跟 setLower() 都加上 &quot;synchronized&quot; 关键字。不要太在意性能，老师都说了，避免过早优化。<br>2. 如果性能有问题，可以把 lower 跟 upper 两个变量封装到一个类中，例如<br>```<br>public class Boundary {<br>    private final lower;<br>    private final upper;<br>    <br>    public Boundary(long lower, long upper) {<br>        if(lower &gt;= upper) {<br>            &#47;&#47; throw exception<br>        }<br>        this.lower = lower;<br>        this.upper = upper;<br>    }<br>}<br>```<br>移除 SafeVM 的 setUpper() 跟 setLower() 方法，并增入 setBoundary(Boundary boundary) 方法。 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-27 22:06:28</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">👍👍<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            undifined  2019-03-26 08:45:15
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            要保证变量间的约束条件，就必须保证判断和赋值是一个原子操作，可以通过给 upper 和 lower 同时加锁，也可以通过 AtomicLong 提供的方法进行操作<br><br>    &#47;&#47; 设置库存上限<br>    void setUpper(long v) {<br>        &#47;&#47; 检查参数合法性<br>        upper.getAndUpdate(u -&gt; {<br>            if (v &lt; lower.get()) {<br>                throw new IllegalArgumentException();<br>            } else {<br>                return v;<br>            }<br>        });<br>    }<br><br>    &#47;&#47; 设置库存下限<br>    void setLower(long v) {<br>        &#47;&#47; 检查参数合法性<br>        lower.getAndUpdate(u -&gt; {<br>            if (v &gt; upper.get()) {<br>                throw new IllegalArgumentException();<br>            } else {<br>                return v;<br>            }<br>        });<br>    }<br> <br>老师这样理解对吗 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-27 22:05:08</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我感觉不可以，还是有竞态条件，你可以在return前面增加sleep看看</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            皮蛋  2019-04-15 08:57:29
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            方法内使用对象加🔒可以解决竞态条件，但不就是用了低级的原语处理了吗，还有其他更好的方式吗？ 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-04-15 19:29:49</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">可以用无锁算法，不过都很复杂，建议还是先用锁</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Boomkeeper  2019-04-09 08:34:19
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            我就不明白了，使用了synchronized，为啥还用voliate，他的确是保证可见性，但是并不能保证原子性，一般他的应用场景应该是不依赖之前的结果而改变数据，累加的场景明显不适合 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            缪文@有赞  2019-04-03 23:09:20
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            作为后端服务开发者，我们开发的是服务接口，实际上很多并发问题都不会遇到，比如这里提到的设置库存上下线，要考虑上限要大于下限，都是在数据库层才考虑的，java这一层dubbo为每个请求分配不同的线程的 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            ZOU志伟  2019-04-03 17:23:43
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            利用之前管程的管程知识也可以解决这个约束条件问题 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            蓝天白云看大海  2019-03-31 12:34:07
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            有些评论里说，加syncronized和volatile，但我觉得syncronized已经可以保证可见性啊，为啥还要加volatile？ 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-31 19:02:01</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">如果用syncronized，就没必要加volatile</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            非礼勿言-非礼勿听-非礼勿视  2019-03-30 21:38:22
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            使用synchronized（this）的话，感觉volatie都不需要用了，jmm模型不是说，释放锁的操作先于后续的加锁发生，加锁成功后，对于上一次释放锁之前的操作结果是可见的 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-31 07:23:39</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">是这样的<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Cc  2019-03-29 14:33:36
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            看到前面好多人用cas操作，我也想了一下，是不行的，因为cas只能同时操作一个变量，这涉及了两个变量。想问下老师java有涉及两个变量的cas吗。比如啊a b   两个变量。如果b的值为比就把a设为c，类似redis的watch。 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-30 08:50:05</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我感觉应该没有</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            CityAnimal  2019-03-29 00:03:44
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            使用AtomicLong的compareAndSet方法可以吗？<br><br>&#47;**<br>     * 设置库存上限<br>     *&#47;<br>    void setUpper(long v) {<br>        long previous;<br>        do {<br>            previous = upper.get();<br>            if (v &lt; previous) {<br>                throw new IllegalArgumentException();<br>            }<br>        } while (!upper.compareAndSet(previous, v));<br>    }<br><br>    &#47;**<br>     * 设置库存下限<br>     *&#47;<br>    void setLower(long v) {<br>        long previous;<br>        do {<br>            previous = lower.get();<br>            if (v &gt; previous) {<br>                throw new IllegalArgumentException();<br>            }<br>        } while (!lower.compareAndSet(previous, v));<br>    } 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-29 20:37:29</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6"><br>一致性约束是，最大库存大于最小库存，所以逻辑好像不对<br></div>
+</div>
+            
+    </div>
+</li>
+            </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,1314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>13-理论基础模块热点问题答疑</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <style>
+        html {
+            color: #333;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-rendering: optimizelegibility;
+            font-family: Helvetica Neue, PingFang SC, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif
+        }
+
+        html.borderbox *,
+        html.borderbox :after,
+        html.borderbox :before {
+            box-sizing: border-box
+        }
+
+        article,
+        aside,
+        blockquote,
+        body,
+        button,
+        code,
+        dd,
+        details,
+        dl,
+        dt,
+        fieldset,
+        figcaption,
+        figure,
+        footer,
+        form,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        header,
+        hr,
+        input,
+        legend,
+        li,
+        menu,
+        nav,
+        ol,
+        p,
+        pre,
+        section,
+        td,
+        textarea,
+        th,
+        ul {
+            margin: 0;
+            padding: 0
+        }
+
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        menu,
+        nav,
+        section {
+            display: block
+        }
+
+        audio,
+        canvas,
+        video {
+            display: inline-block
+        }
+
+        body,
+        button,
+        input,
+        select,
+        textarea {
+            font: 300 1em/1.8 PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, Helvetica, sans-serif
+        }
+
+        button::-moz-focus-inner,
+        input::-moz-focus-inner {
+            padding: 0;
+            border: 0
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0
+        }
+
+        fieldset,
+        img {
+            border: 0
+        }
+
+        blockquote {
+            position: relative;
+            color: #999;
+            font-weight: 400;
+            border-left: 1px solid #1abc9c;
+            padding-left: 1em;
+            margin: 1em 3em 1em 2em
+        }
+
+        @media only screen and (max-width: 640px) {
+            blockquote {
+                margin: 1em 0
+            }
+        }
+
+        abbr,
+        acronym {
+            border-bottom: 1px dotted;
+            font-variant: normal
+        }
+
+        abbr {
+            cursor: help
+        }
+
+        del {
+            text-decoration: line-through
+        }
+
+        address,
+        caption,
+        cite,
+        code,
+        dfn,
+        em,
+        th,
+        var {
+            font-style: normal;
+            font-weight: 400
+        }
+
+        ol,
+        ul {
+            list-style: none
+        }
+
+        caption,
+        th {
+            text-align: left
+        }
+
+        q:after,
+        q:before {
+            content: ""
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative
+        }
+
+        :root sub,
+        :root sup {
+            vertical-align: baseline
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        a {
+            color: #1abc9c
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        .typo a {
+            border-bottom: 1px solid #1abc9c
+        }
+
+        .typo a:hover {
+            border-bottom-color: #555;
+            color: #555
+        }
+
+        .typo a:hover,
+        a,
+        ins {
+            text-decoration: none
+        }
+
+        .typo-u,
+        u {
+            text-decoration: underline
+        }
+
+        mark {
+            background: #fffdd1;
+            border-bottom: 1px solid #ffedce;
+            padding: 2px;
+            margin: 0 5px
+        }
+
+        code,
+        pre,
+        pre tt {
+            font-family: Courier, Courier New, monospace
+        }
+
+        pre {
+            background: hsla(0, 0%, 97%, .7);
+            border: 1px solid #ddd;
+            padding: 1em 1.5em;
+            display: block;
+            -webkit-overflow-scrolling: touch
+        }
+
+        hr {
+            border: none;
+            border-bottom: 1px solid #cfcfcf;
+            margin-bottom: .8em;
+            height: 10px
+        }
+
+        .typo-small,
+        figcaption,
+        small {
+            font-size: .9em;
+            color: #888
+        }
+
+        b,
+        strong {
+            font-weight: 700;
+            color: #000
+        }
+
+        [draggable] {
+            cursor: move
+        }
+
+        .clearfix:after,
+        .clearfix:before {
+            content: "";
+            display: table
+        }
+
+        .clearfix:after {
+            clear: both
+        }
+
+        .clearfix {
+            zoom: 1
+        }
+
+        .textwrap,
+        .textwrap td,
+        .textwrap th {
+            word-wrap: break-word;
+            word-break: break-all
+        }
+
+        .textwrap-table {
+            table-layout: fixed
+        }
+
+        .serif {
+            font-family: Palatino, Optima, Georgia, serif
+        }
+
+        .typo-dl,
+        .typo-form,
+        .typo-hr,
+        .typo-ol,
+        .typo-p,
+        .typo-pre,
+        .typo-table,
+        .typo-ul,
+        .typo dl,
+        .typo form,
+        .typo hr,
+        .typo ol,
+        .typo p,
+        .typo pre,
+        .typo table,
+        .typo ul,
+        blockquote {
+            margin-bottom: 1rem
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: PingFang SC, Helvetica Neue, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
+            color: #000;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo-h2,
+        .typo-h3,
+        .typo-h4,
+        .typo-h5,
+        .typo-h6,
+        .typo h1,
+        .typo h2,
+        .typo h3,
+        .typo h4,
+        .typo h5,
+        .typo h6 {
+            margin-top: 1.2em;
+            margin-bottom: .6em;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo h1 {
+            font-size: 2em
+        }
+
+        .typo-h2,
+        .typo h2 {
+            font-size: 1.8em
+        }
+
+        .typo-h3,
+        .typo h3 {
+            font-size: 1.6em
+        }
+
+        .typo-h4,
+        .typo h4 {
+            font-size: 1.4em
+        }
+
+        .typo-h5,
+        .typo-h6,
+        .typo h5,
+        .typo h6 {
+            font-size: 1.2em
+        }
+
+        .typo-ul,
+        .typo ul {
+            margin-left: 1.3em;
+            list-style: disc
+        }
+
+        .typo-ol,
+        .typo ol {
+            list-style: decimal;
+            margin-left: 1.9em
+        }
+
+        .typo-ol ol,
+        .typo-ol ul,
+        .typo-ul ol,
+        .typo-ul ul,
+        .typo li ol,
+        .typo li ul {
+            margin-bottom: .8em;
+            margin-left: 2em
+        }
+
+        .typo-ol ul,
+        .typo-ul ul,
+        .typo li ul {
+            list-style: circle
+        }
+
+        .typo-table td,
+        .typo-table th,
+        .typo table caption,
+        .typo table td,
+        .typo table th {
+            border: 1px solid #ddd;
+            padding: .5em 1em;
+            color: #666
+        }
+
+        .typo-table th,
+        .typo table th {
+            background: #fbfbfb
+        }
+
+        .typo-table thead th,
+        .typo table thead th {
+            background: hsla(0, 0%, 95%, .7)
+        }
+
+        .typo table caption {
+            border-bottom: none
+        }
+
+        .typo-input,
+        .typo-textarea {
+            -webkit-appearance: none;
+            border-radius: 0
+        }
+
+        .typo-em,
+        .typo em,
+        caption,
+        legend {
+            color: #000;
+            font-weight: inherit
+        }
+
+        .typo-em {
+            position: relative
+        }
+
+        .typo-em:after {
+            position: absolute;
+            top: .65em;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            content: "\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB"
+        }
+
+        .typo img {
+            max-width: 100%
+        }
+
+        .common-content {
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.75rem;
+            white-space: normal;
+            word-break: normal;
+            font-size: 1rem
+        }
+
+        .common-content img {
+            display: block;
+            max-width: 100%;
+            background-color: #eee
+        }
+
+        .common-content audio,
+        .common-content video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        .common-content center,
+        .common-content font {
+            margin-top: 1rem;
+            display: inline-block
+        }
+
+        .common-content center {
+            width: 100%
+        }
+
+        .common-content pre {
+            margin-top: 1rem;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            overflow: hidden
+        }
+
+        .common-content pre code {
+            font-size: .8rem;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            overflow-x: auto
+        }
+
+        .common-content hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        .common-content b,
+        .common-content h1,
+        .common-content h2,
+        .common-content h3,
+        .common-content h4,
+        .common-content h5,
+        .common-content strong {
+            font-weight: 700
+        }
+
+        .common-content h1,
+        .common-content h2 {
+            font-size: 1.125rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content h3,
+        .common-content h4,
+        .common-content h5 {
+            font-size: 1rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: .15rem
+        }
+
+        .common-content .orange {
+            color: #ff5a05
+        }
+
+        .common-content .reference {
+            font-size: 1rem;
+            color: #888
+        }
+
+        .custom-rich-content h1 {
+            margin-top: 0;
+            font-weight: 400;
+            font-size: 15.25px;
+            border-bottom: 1px solid #eee;
+            line-height: 2.8
+        }
+
+        .custom-rich-content li,
+        .custom-rich-content p {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6
+        }
+
+        table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        table.hljs-ln,
+        table.hljs-ln tbody,
+        table.hljs-ln td,
+        table.hljs-ln tr {
+            box-sizing: border-box
+        }
+
+        table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none
+        }
+
+        table.hljs-ln td.hljs-ln-code,
+        table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            font-size: 12px;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            color: #24292e;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+        video::-webkit-media-controls {
+            overflow: hidden !important
+        }
+
+        video::-webkit-media-controls-enclosure {
+            width: calc(100% + 32px);
+            margin-left: auto
+        }
+
+        ._29HP61GA_0 {
+            max-width:800px;
+            margin:0 auto;
+            margin-bottom: 20px;
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.76;
+            white-space: normal;
+            word-break: normal;
+            font-size: 17px;
+            -webkit-transition: background-color .3s ease;
+            transition: background-color .3s ease
+        }
+
+        ._29HP61GA_0 .MathJax_Display {
+            overflow: auto
+        }
+
+        ._29HP61GA_0 .poster {
+            position: fixed;
+            left: -10000px;
+            top: -10000px;
+            overflow: hidden;
+            padding: 1rem;
+            background: #ececec
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy {
+            font-size: 13px;
+            color: #888;
+            position: absolute;
+            right: 1em;
+            top: .5em;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy .iconfont {
+            font-size: 12px;
+            margin-right: .2em
+        }
+
+        ._29HP61GA_0 a {
+            color: #fa8919;
+            border-bottom: 1px solid #fa8919
+        }
+
+        ._29HP61GA_0 img {
+            display: block;
+            max-width: 100%;
+            position: relative;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            background-color: #eee;
+            vertical-align: top;
+            border-radius: 0
+        }
+
+        ._29HP61GA_0 audio,
+        ._29HP61GA_0 video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        ._29HP61GA_0 pre {
+            margin-top: 16px;
+            padding: 34px 0 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-radius: 6px;
+            background: rgba(246, 247, 251, .749);
+            border: 0
+        }
+
+        ._29HP61GA_0 pre code {
+            font-size: 12px;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-left: 16px;
+            margin-right: 16px;
+            overflow-x: scroll
+        }
+
+        ._29HP61GA_0 pre code:after {
+            content: "";
+            height: 30px;
+            width: 100%;
+            display: block
+        }
+
+        ._29HP61GA_0 hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        ._29HP61GA_0 h1,
+        ._29HP61GA_0 h2,
+        ._29HP61GA_0 h3,
+        ._29HP61GA_0 h4,
+        ._29HP61GA_0 h5 {
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 b,
+        ._29HP61GA_0 strong {
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 h1 {
+            font-size: 21px
+        }
+
+        ._29HP61GA_0 h2 {
+            font-size: 20px
+        }
+
+        ._29HP61GA_0 h3 {
+            font-size: 19px
+        }
+
+        ._29HP61GA_0 h4 {
+            font-size: 18px
+        }
+
+        ._29HP61GA_0 h5 {
+            font-size: 17px
+        }
+
+        ._29HP61GA_0 center,
+        ._29HP61GA_0 p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: 0;
+            margin-bottom: 30px;
+            word-break: break-word
+        }
+
+        ._29HP61GA_0 center {
+            text-align: center
+        }
+
+        ._29HP61GA_0 blockquote {
+            margin-top: 0;
+            margin-bottom: 34px;
+            border-left: 3px solid #e8e8e8;
+            padding-left: 17px;
+            color: #353535
+        }
+
+        ._29HP61GA_0 blockquote p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol,
+        ._29HP61GA_0 ul {
+            margin-bottom: 30px
+        }
+
+        ._29HP61GA_0 ol p,
+        ._29HP61GA_0 ul p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol {
+            list-style: decimal;
+            margin-left: 20px
+        }
+
+        ._29HP61GA_0 ul li {
+            padding-left: 17px;
+            position: relative;
+            margin-bottom: 10px
+        }
+
+        ._29HP61GA_0 ul li:after {
+            content: "";
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            background: #353535;
+            position: absolute;
+            top: 10px;
+            left: 0
+        }
+
+        ._29HP61GA_0 .orange {
+            color: #fa8919
+        }
+
+        ._29HP61GA_0 .reference {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-right {
+            text-align: right
+        }
+
+        ._29HP61GA_0 .m-center {
+            text-align: center;
+            display: block
+        }
+
+        ._29HP61GA_0 .m-gray {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-small {
+            font-size: 15px
+        }
+
+        ._29HP61GA_0 table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        ._29HP61GA_0 table.hljs-ln,
+        ._29HP61GA_0 table.hljs-ln tbody,
+        ._29HP61GA_0 table.hljs-ln td,
+        ._29HP61GA_0 table.hljs-ln tr {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box
+        }
+
+        ._29HP61GA_0 table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            font-size: 12px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code,
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            font-size: 13px;
+            color: #666;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+    </style>
+</head>
+<body>
+<div class="_29HP61GA_0">
+<h1>13-理论基础模块热点问题答疑</h1>
+<p>到这里，专栏的第一模块——并发编程的理论基础，我们已经讲解完了，总共12篇，不算少，但“跳出来，看全景”你会发现这12篇的内容基本上是一个“串行的故事”。所以，在学习过程中，建议你从一个个单一的知识和技术中“跳出来”，看全局，搭建自己的并发编程知识体系。</p><p>为了便于你更好地学习和理解，下面我会先将这些知识点再简单地为你“串”一下，咱们一起复习下；然后就每篇文章的课后思考题、留言区的热门评论，我也集中总结和回复一下。</p><p><strong>那这个“串行的故事”是怎样的呢？</strong></p><p>起源是一个硬件的核心矛盾：CPU与内存、I/O的速度差异，系统软件（操作系统、编译器）在解决这个核心矛盾的同时，引入了可见性、原子性和有序性问题，这三个问题就是很多并发程序的Bug之源。这，就是<a href="https://time.geekbang.org/column/article/83682">01</a>的内容。</p><p>那如何解决这三个问题呢？Java语言自然有招儿，它提供了Java内存模型和互斥锁方案。所以，在<a href="https://time.geekbang.org/column/article/84017">02</a>我们介绍了Java内存模型，以应对可见性和有序性问题；那另一个原子性问题该如何解决？多方考量用好互斥锁才是关键，这就是<a href="https://time.geekbang.org/column/article/84344">03</a>和<a href="https://time.geekbang.org/column/article/84601">04</a>的内容。</p><p>虽说互斥锁是解决并发问题的核心工具，但它也可能会带来死锁问题，所以<a href="https://time.geekbang.org/column/article/85001">05</a>就介绍了死锁的产生原因以及解决方案；同时还引出一个线程间协作的问题，这也就引出了<a href="https://time.geekbang.org/column/article/85241">06</a>这篇文章的内容，介绍线程间的协作机制：等待-通知。</p><!-- [[[read_end]]] --><p>你应该也看出来了，前六篇文章，我们更多地是站在微观的角度看待并发问题。而<a href="https://time.geekbang.org/column/article/85702">07</a>则是换一个角度，站在宏观的角度重新审视并发编程相关的概念和理论，同时也是对前六篇文章的查漏补缺。</p><p><a href="https://time.geekbang.org/column/article/86089">08</a>介绍的管程，是Java并发编程技术的基础，是解决并发问题的万能钥匙。并发编程里两大核心问题——互斥和同步，都是可以由管程来解决的。所以，学好管程，就相当于掌握了一把并发编程的万能钥匙。</p><p>至此，并发编程相关的问题，理论上你都应该能找到问题所在，并能给出理论上的解决方案了。</p><p>而后在<a href="https://time.geekbang.org/column/article/86366">09</a>、<a href="https://time.geekbang.org/column/article/86666">10</a>和<a href="https://time.geekbang.org/column/article/86695">11</a>我们又介绍了线程相关的知识，毕竟Java并发编程是要靠多线程来实现的，所以有针对性地学习这部分知识也是很有必要的，包括线程的生命周期、如何计算合适的线程数以及线程内部是如何执行的。</p><p>最后，在<a href="https://time.geekbang.org/column/article/87365">12</a>我们还介绍了如何用面向对象思想写好并发程序，因为在Java语言里，面向对象思想能够让并发编程变得更简单。</p><p><img src="https://static001.geekbang.org/resource/image/7f/8e/7fed6a485a694c794ee205c346b5338e.png" alt=""></p><center><span class="reference">并发编程理论基础模块思维导图</span></center><p>经过这样一个简要的总结，相信你此时对于并发编程相关的概念、理论、产生的背景以及它们背后的关系已经都有了一个相对全面的认识。至于更深刻的认识和应用体验，还是需要你“钻进去，看本质”，加深对技术本身的认识，拓展知识深度和广度。</p><p>另外，在每篇文章的最后，我都附上了一个思考题，这些思考题虽然大部分都很简单，但是隐藏的问题却很容易让人忽略，从而不经意间就引发了Bug；再加上留言区的一些热门评论，所以我想着<strong>将这些隐藏的问题或者易混淆的问题，做一个总结也是很有必要的</strong>。</p><h2>1. 用锁的最佳实践</h2><p>例如，在<a href="https://time.geekbang.org/column/article/84344">《03 | 互斥锁（上）：解决原子性问题》</a>和<a href="https://time.geekbang.org/column/article/84601">《04 | 互斥锁（下）：如何用一把锁保护多个资源？》</a>这两篇文章中，我们的思考题都是关于如何创建正确的锁，而思考题里的做法都是错误的。</p><p><a href="https://time.geekbang.org/column/article/84344">03</a>的思考题的示例代码如下，<code>synchronized (new Object())</code> 这行代码很多同学已经分析出来了，每次调用方法get()、addOne()都创建了不同的锁，相当于无锁。这里需要你再次加深一下记忆，“<strong>一个合理的受保护资源与锁之间的关联关系应该是N:1</strong>”。只有共享一把锁才能起到互斥的作用。</p><p>另外，很多同学也提到，JVM开启逃逸分析之后，<code>synchronized (new Object())</code> 这行代码在实际执行的时候会被优化掉，也就是说在真实执行的时候，这行代码压根就不存在。不过无论你是否懂“逃逸分析”都不影响你学好并发编程，如果你对“逃逸分析”感兴趣，可以参考一些JVM相关的资料。</p><pre><code>class SafeCalc {
+  long value = 0L;
+  long get() {
+    synchronized (new Object()) {
+      return value;
+    }
+  }
+  void addOne() {
+    synchronized (new Object()) {
+      value += 1;
+    }
+  }
+}
+</code></pre><p><a href="https://time.geekbang.org/column/article/84601">04</a>的思考题转换成代码，是下面这个样子。它的核心问题有两点：一个是锁有可能会变化，另一个是 Integer 和 String 类型的对象不适合做锁。如果锁发生变化，就意味着失去了互斥功能。 Integer 和 String 类型的对象在JVM里面是可能被重用的，除此之外，JVM里可能被重用的对象还有Boolean，那重用意味着什么呢？意味着你的锁可能被其他代码使用，如果其他代码 <code>synchronized(你的锁)</code>，而且不释放，那你的程序就永远拿不到锁，这是隐藏的风险。</p><pre><code>class Account {
+  // 账户余额  
+  private Integer balance;
+  // 账户密码
+  private String password;
+  // 取款
+  void withdraw(Integer amt) {
+    synchronized(balance) {
+      if (this.balance &gt; amt){
+        this.balance -= amt;
+      }
+    }
+  } 
+  // 更改密码
+  void updatePassword(String pw){
+    synchronized(password) {
+      this.password = pw;
+    }
+  } 
+}
+</code></pre><p>通过这两个反例，我们可以总结出这样一个基本的原则：<strong>锁，应是私有的、不可变的、不可重用的</strong>。我们经常看到别人家的锁，都长成下面示例代码这样，这种写法貌不惊人，却能避免各种意想不到的坑，这个其实就是最佳实践。最佳实践这方面的资料推荐你看《Java安全编码标准》这本书，研读里面的每一条规则都会让你受益匪浅。</p><pre><code>// 普通对象锁
+private final Object 
+  lock = new Object();
+// 静态对象锁
+private static final Object
+  lock = new Object(); 
+</code></pre><h2>2. 锁的性能要看场景</h2><p><a href="https://time.geekbang.org/column/article/85001">《05 | 一不小心就死锁了，怎么办？》</a>的思考题是比较<code>while(!actr.apply(this, target));</code>这个方法和<code>synchronized(Account.class)</code>的性能哪个更好。</p><p>这个要看具体的应用场景，不同应用场景它们的性能表现是不同的。在这个思考题里面，如果转账操作非常费时，那么前者的性能优势就显示出来了，因为前者允许A-&gt;B、C-&gt;D这种转账业务的并行。不同的并发场景用不同的方案，这是并发编程里面的一项基本原则；没有通吃的技术和方案，因为每种技术和方案都是优缺点和适用场景的。</p><h2>3. 竞态条件需要格外关注</h2><p><a href="https://time.geekbang.org/column/article/85702">《07 | 安全性、活跃性以及性能问题》</a>里的思考题是一种典型的竞态条件问题（如下所示）。竞态条件问题非常容易被忽略，contains()和add()方法虽然都是线程安全的，但是组合在一起却不是线程安全的。所以你的程序里如果存在类似的组合操作，一定要小心。</p><pre><code>void addIfNotExist(Vector v, 
+    Object o){
+  if(!v.contains(o)) {
+    v.add(o);
+  }
+}
+</code></pre><p>这道思考题的解决方法，可以参考<a href="https://time.geekbang.org/column/article/87365">《12 | 如何用面向对象思想写好并发程序？》</a>，你需要将共享变量v封装在对象的内部，而后控制并发访问的路径，这样就能有效防止对Vector v变量的滥用，从而导致并发问题。你可以参考下面的示例代码来加深理解。</p><pre><code>class SafeVector{
+  private Vector v; 
+  // 所有公共方法增加同步控制
+  synchronized 
+  void addIfNotExist(Object o){
+    if(!v.contains(o)) {
+      v.add(o);
+    }
+  }
+}
+</code></pre><h2>4. 方法调用是先计算参数</h2><p>不过，还有同学对<a href="https://time.geekbang.org/column/article/85702">07</a>文中所举的例子有疑议，认为<code>set(get()+1);</code>这条语句是进入set()方法之后才执行get()方法，其实并不是这样的。方法的调用，是先计算参数，然后将参数压入调用栈之后才会执行方法体，方法调用的过程在<a href="https://time.geekbang.org/column/article/86695">11</a>这篇文章中我们已经做了详细的介绍，你可以再次重温一下。</p><pre><code>while(idx++ &lt; 10000) {
+  set(get()+1);   
+}
+</code></pre><p>先计算参数这个事情也是容易被忽视的细节。例如，下面写日志的代码，如果日志级别设置为INFO，虽然这行代码不会写日志，但是会计算<code>"The var1：" + var1 + ", var2:" + var2</code>的值，因为方法调用前会先计算参数。</p><pre><code>logger.debug(&quot;The var1：&quot; + 
+  var1 + &quot;, var2:&quot; + var2);
+</code></pre><p>更好地写法应该是下面这样，这种写法仅仅是讲参数压栈，而没有参数的计算。使用{}占位符是写日志的一个良好习惯。</p><pre><code>logger.debug(&quot;The var1：{}, var2:{}&quot;, 
+  var1, var2);
+</code></pre><h2>5. InterruptedException异常处理需小心</h2><p><a href="https://time.geekbang.org/column/article/86366">《 09 | Java线程（上）：Java线程的生命周期》</a>的思考题主要是希望你能够注意InterruptedException的处理方式。当你调用Java对象的wait()方法或者线程的sleep()方法时，需要捕获并处理InterruptedException异常，在思考题里面（如下所示），本意是通过isInterrupted()检查线程是否被中断了，如果中断了就退出while循环。当其他线程通过调用<code>th.interrupt().</code>来中断th线程时，会设置th线程的中断标志位，从而使<code>th.isInterrupted()</code>返回true，这样就能退出while循环了。</p><pre><code>Thread th = Thread.currentThread();
+while(true) {
+  if(th.isInterrupted()) {
+    break;
+  }
+  // 省略业务代码无数
+  try {
+    Thread.sleep(100);
+  }catch (InterruptedException e){
+    e.printStackTrace();
+  }
+}
+</code></pre><p>这看上去一点问题没有，实际上却是几乎起不了作用。原因是这段代码在执行的时候，大部分时间都是阻塞在sleep(100)上，当其他线程通过调用<code>th.interrupt().</code>来中断th线程时，大概率地会触发InterruptedException 异常，<strong>在触发InterruptedException 异常的同时，JVM会同时把线程的中断标志位清除</strong>，所以这个时候<code>th.isInterrupted()</code>返回的是false。</p><p>正确的处理方式应该是捕获异常之后重新设置中断标志位，也就是下面这样：</p><pre><code>try {
+  Thread.sleep(100);
+}catch(InterruptedException e){
+  // 重新设置中断标志位
+  th.interrupt();
+}
+</code></pre><h2>6. 理论值 or 经验值</h2><p><a href="https://time.geekbang.org/column/article/86666">《10 | Java线程（中）：创建多少线程才是合适的？》</a>的思考题是：经验值为“最佳线程=2 * CPU的核数 + 1”，是否合理？</p><p>从理论上来讲，这个经验值一定是靠不住的。但是经验值对于很多“I/O耗时 / CPU耗时”不太容易确定的系统来说，却是一个很好到初始值。</p><p>我们曾讲到最佳线程数最终还是靠压测来确定的，实际工作中大家面临的系统，“I/O耗时 / CPU耗时”往往都大于1，所以基本上都是在这个<strong>初始值的基础上增加</strong>。增加的过程中，应关注线程数是如何影响吞吐量和延迟的。一般来讲，随着线程数的增加，吞吐量会增加，延迟也会缓慢增加；但是当线程数增加到一定程度，吞吐量就会开始下降，延迟会迅速增加。这个时候基本上就是线程能够设置的最大值了。</p><p>实际工作中，不同的I/O模型对最佳线程数的影响非常大，例如大名鼎鼎的Nginx用的是非阻塞I/O，采用的是多进程单线程结构，Nginx本来是一个I/O密集型系统，但是最佳进程数设置的却是CPU的核数，完全参考的是CPU密集型的算法。所以，理论我们还是要活学活用。</p><h2>总结</h2><p>这个模块，内容主要聚焦在并发编程相关的理论上，但是思考题则是聚焦在细节上，我们经常说细节决定成败，在并发编程领域尤其如此。理论主要用来给我们提供解决问题的思路和方法，但在具体实践的时候，还必须重点关注每一个细节，哪怕有一个细节没有处理好，都会导致并发问题。这方面推荐你认真阅读《Java安全编码标准》这本书，如果你英文足够好，也可以参考<a href="https://wiki.sei.cmu.edu/confluence/display/java/2+Rules">这份文档</a>。</p><p>最后总结一句，学好理论有思路，关注细节定成败。</p><p>欢迎在留言区与我分享你的想法，也欢迎你在留言区记录你的思考过程。感谢阅读，如果你觉得这篇文章对你有帮助的话，也欢迎把它分享给更多的朋友。</p><h1>猜你喜欢</h1><p><a href="https://time.geekbang.org/course/intro/156?utm_term=zeusRVDGT&amp;utm_source=app&amp;utm_medium=javabingfabiancheng&amp;utm_campaign=156-onsell&amp;utm_content=banner0301"><img src="https://static001.geekbang.org/resource/image/8e/93/8e1906fb8a24d5eb66539fa88ea56193.png" alt="unpreview"></a></p><h2>精选留言：</h2>
+        <ul>
+        
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            binary  2019-03-28 00:32:34
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            这个专栏内容值得反复阅读！ [19赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Jialin  2019-03-28 09:55:48
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            建议iamNigel同学去搜索下Integer String Boolean相关的知识，Integer会缓存-128～127这个范围内的数值，String对象同样会缓存字符串常量到字符串常量池，可供重复使用，所以不能用来用作锁对象，网上有相关的知识讲解和面试问题<br>老师讲解的非常不错，单看每一节，觉得自己已略一二，学完这节才发现要自己的知识点要串起来，整体了解并发 [12赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 20:37:53</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">感谢帮忙回复！</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            linqw  2019-03-30 11:07:38
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            学完这模块，自己理下，老师帮忙看下哦<br>1、产生并发的原因：cpu、内存、磁盘速度的差异，在硬件和软件方面解决速度差异引发的并发问题，cpu缓存-&gt;可见性，线程切换-&gt;原子性，编译优化-&gt;重排序，引发并发问题的根源。<br>2、并发的解决：可见性解决方法-&gt;volatile、synchronized,原子性的解决方法-&gt;互斥锁，重排序-&gt;volatile,禁掉编译优化<br>3、解决并发原子性产生的问题：死锁，死锁产生的所有条件-&gt;①资源互斥②不能抢占③占有且等待④循环等待，死锁的解决办法-&gt;①按锁的顺序获取②增加锁的分配器。<br>4、宏观角度分析，以上都是从微观角度进行分析并发问题，宏观，即安全问题，性能问题，活跃性问题<br>5、本质看问题，管程<br>6、实际看问题，java生命周期，线程数的分配，线程的执行<br>7、以子之矛攻子之盾，面向对象解决并发问题， 属性final、私有、只有getter方法没有setter方法，属性的赋值，深复制再进行操作等等 [5赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-30 14:07:43</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">很全面了</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            DemonLee  2019-03-28 12:27:19
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            这个课程99便宜了，建议涨价，一定要反复多看几遍 [5赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 21:39:20</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">这个建议可以多提😃</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            IamNigel  2019-03-28 07:56:05
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            Integer string Boolean的可重用没太明白，希望老师讲解下 [5赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            zws  2019-03-29 08:56:55
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            推荐 java 并发编程实战 加深理解。 [4赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            皮卡皮卡丘  2019-03-28 09:38:30
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            看下源码就知道了，Integer里有个内部类，会缓存一定范围的整数 [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 20:38:12</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">感谢帮忙回复！</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            zhangtnty  2019-03-28 07:51:31
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            王老师好，在第11讲中，new出的对象放入堆，局部变量放入栈桢。那么new出的线程会放到哪里？麻烦老师这块能否展开讲一下，谢谢😊 [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 21:42:39</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">线程也是个对象，对象的引用在栈里，对象在堆里<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            红衣闪闪亮晶晶  2019-04-07 21:25:06
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师，我有一点不明白，我看到其他大佬的评论去搜了关于integer的知识，我明白integer内部有缓存，比如超过127会重新新建一个类，这样的sync锁的就是不同的对象了，可是如果是-128 - 127之间，会重用缓存，那他们不就是同一个对象了吗，为什么还会锁不住呢？ [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-04-08 12:21:07</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">如果100个人的项目都用这个缓存的对象做锁，还有人一直不释放，那整个系统都不了用了，锁也要隔离的<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Ryan  2019-03-29 08:22:49
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            第二模块出了么？老师 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-29 12:47:27</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">周六出</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            李湘河  2019-03-28 23:18:05
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            复习了一遍想问老师一个问题，我对java中synchronized理解是只能解决可见性和原子性问题，不能解决有续性问题，但是java中synchronized是管程模型的实现，而管程模型可以解决并发编程里的所有问题(同步和互斥)，这个意思是也可以解决java内存模型中的有续性问题吗？不知道我的理解对不对，还请老师解答一下？ [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-29 12:29:44</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">能解决有序性，会禁止重排的<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            QQ怪  2019-03-28 19:55:07
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            总结的真好 [1赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            彭锐  2019-03-28 10:16:16
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            String s1 = &quot;lock&quot;; <br>String s2 = &quot;lock&quot;;<br>这两个是一个对象，即重用了。代码上看起来是操作了一个，其实是操作了两个。 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 12:21:12</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">这个例子好<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            刘得淼  2019-03-28 10:15:17
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            “学好理论有思路，关注细节定成败。”通过学前几章，帮助项目组里解决个并发的bug。现学现卖。 [1赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-28 12:22:34</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">看来学的很好😃<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            罗琦  2019-04-14 08:30:57
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            如果多线程中的IO操作是网络IO，比如RPC调用，会对线程数的设定有什么影响？ 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-04-14 11:13:59</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">要看rpc的网络模型是什么样的</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            kk  2019-04-12 09:52:16
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            这个专栏好 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            红衣闪闪亮晶晶  2019-04-08 12:32:20
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            谢谢老师回复我的留言，真是豁然开朗 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            on the way  2019-04-02 08:22:46
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            我看过一个代码，用string.intern（）做锁的。有点不太明白和string有什么区别… 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-04-02 23:04:18</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">intern内部是共享的，你看过的代码要么是写错了，要么是炫技，总之都不推荐<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            张德  2019-03-31 16:22:35
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            这个面试会经常被问到 
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            siouty  2019-03-29 09:17:19
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            建议有一个完整的代码链接贴出来<br>单个片段就像老师前面说的以点看面绕晕了<br><br>还有本人小白对计算机和JAVA程序是怎么交互的不太懂，还望老师能细心解答一下。<br><br>JAVA虚拟机内存和计算机内存是是什么区别？<br><br>以前理解的内存是一个内存卡和移动硬盘等可以存储东西的实体，可是看了文章又觉得计算机内存是个虚拟的东西，搞得好乱。 
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-29 12:22:32</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">建议先去看看java编程基础吧，他们讲的比我专业<br></div>
+</div>
+            
+    </div>
+</li>
+            </ul>
+</div>
+</body>
+</html>

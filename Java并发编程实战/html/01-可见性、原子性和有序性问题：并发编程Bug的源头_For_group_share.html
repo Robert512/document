@@ -1,0 +1,1308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>01-可见性、原子性和有序性问题：并发编程Bug的源头</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <style>
+        html {
+            color: #333;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-rendering: optimizelegibility;
+            font-family: Helvetica Neue, PingFang SC, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif
+        }
+
+        html.borderbox *,
+        html.borderbox :after,
+        html.borderbox :before {
+            box-sizing: border-box
+        }
+
+        article,
+        aside,
+        blockquote,
+        body,
+        button,
+        code,
+        dd,
+        details,
+        dl,
+        dt,
+        fieldset,
+        figcaption,
+        figure,
+        footer,
+        form,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        header,
+        hr,
+        input,
+        legend,
+        li,
+        menu,
+        nav,
+        ol,
+        p,
+        pre,
+        section,
+        td,
+        textarea,
+        th,
+        ul {
+            margin: 0;
+            padding: 0
+        }
+
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        menu,
+        nav,
+        section {
+            display: block
+        }
+
+        audio,
+        canvas,
+        video {
+            display: inline-block
+        }
+
+        body,
+        button,
+        input,
+        select,
+        textarea {
+            font: 300 1em/1.8 PingFang SC, Lantinghei SC, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, Helvetica, sans-serif
+        }
+
+        button::-moz-focus-inner,
+        input::-moz-focus-inner {
+            padding: 0;
+            border: 0
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0
+        }
+
+        fieldset,
+        img {
+            border: 0
+        }
+
+        blockquote {
+            position: relative;
+            color: #999;
+            font-weight: 400;
+            border-left: 1px solid #1abc9c;
+            padding-left: 1em;
+            margin: 1em 3em 1em 2em
+        }
+
+        @media only screen and (max-width: 640px) {
+            blockquote {
+                margin: 1em 0
+            }
+        }
+
+        abbr,
+        acronym {
+            border-bottom: 1px dotted;
+            font-variant: normal
+        }
+
+        abbr {
+            cursor: help
+        }
+
+        del {
+            text-decoration: line-through
+        }
+
+        address,
+        caption,
+        cite,
+        code,
+        dfn,
+        em,
+        th,
+        var {
+            font-style: normal;
+            font-weight: 400
+        }
+
+        ol,
+        ul {
+            list-style: none
+        }
+
+        caption,
+        th {
+            text-align: left
+        }
+
+        q:after,
+        q:before {
+            content: ""
+        }
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative
+        }
+
+        :root sub,
+        :root sup {
+            vertical-align: baseline
+        }
+
+        sup {
+            top: -.5em
+        }
+
+        sub {
+            bottom: -.25em
+        }
+
+        a {
+            color: #1abc9c
+        }
+
+        a:hover {
+            text-decoration: underline
+        }
+
+        .typo a {
+            border-bottom: 1px solid #1abc9c
+        }
+
+        .typo a:hover {
+            border-bottom-color: #555;
+            color: #555
+        }
+
+        .typo a:hover,
+        a,
+        ins {
+            text-decoration: none
+        }
+
+        .typo-u,
+        u {
+            text-decoration: underline
+        }
+
+        mark {
+            background: #fffdd1;
+            border-bottom: 1px solid #ffedce;
+            padding: 2px;
+            margin: 0 5px
+        }
+
+        code,
+        pre,
+        pre tt {
+            font-family: Courier, Courier New, monospace
+        }
+
+        pre {
+            background: hsla(0, 0%, 97%, .7);
+            border: 1px solid #ddd;
+            padding: 1em 1.5em;
+            display: block;
+            -webkit-overflow-scrolling: touch
+        }
+
+        hr {
+            border: none;
+            border-bottom: 1px solid #cfcfcf;
+            margin-bottom: .8em;
+            height: 10px
+        }
+
+        .typo-small,
+        figcaption,
+        small {
+            font-size: .9em;
+            color: #888
+        }
+
+        b,
+        strong {
+            font-weight: 700;
+            color: #000
+        }
+
+        [draggable] {
+            cursor: move
+        }
+
+        .clearfix:after,
+        .clearfix:before {
+            content: "";
+            display: table
+        }
+
+        .clearfix:after {
+            clear: both
+        }
+
+        .clearfix {
+            zoom: 1
+        }
+
+        .textwrap,
+        .textwrap td,
+        .textwrap th {
+            word-wrap: break-word;
+            word-break: break-all
+        }
+
+        .textwrap-table {
+            table-layout: fixed
+        }
+
+        .serif {
+            font-family: Palatino, Optima, Georgia, serif
+        }
+
+        .typo-dl,
+        .typo-form,
+        .typo-hr,
+        .typo-ol,
+        .typo-p,
+        .typo-pre,
+        .typo-table,
+        .typo-ul,
+        .typo dl,
+        .typo form,
+        .typo hr,
+        .typo ol,
+        .typo p,
+        .typo pre,
+        .typo table,
+        .typo ul,
+        blockquote {
+            margin-bottom: 1rem
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: PingFang SC, Helvetica Neue, Verdana, Microsoft Yahei, Hiragino Sans GB, Microsoft Sans Serif, WenQuanYi Micro Hei, sans-serif;
+            color: #000;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo-h2,
+        .typo-h3,
+        .typo-h4,
+        .typo-h5,
+        .typo-h6,
+        .typo h1,
+        .typo h2,
+        .typo h3,
+        .typo h4,
+        .typo h5,
+        .typo h6 {
+            margin-top: 1.2em;
+            margin-bottom: .6em;
+            line-height: 1.35
+        }
+
+        .typo-h1,
+        .typo h1 {
+            font-size: 2em
+        }
+
+        .typo-h2,
+        .typo h2 {
+            font-size: 1.8em
+        }
+
+        .typo-h3,
+        .typo h3 {
+            font-size: 1.6em
+        }
+
+        .typo-h4,
+        .typo h4 {
+            font-size: 1.4em
+        }
+
+        .typo-h5,
+        .typo-h6,
+        .typo h5,
+        .typo h6 {
+            font-size: 1.2em
+        }
+
+        .typo-ul,
+        .typo ul {
+            margin-left: 1.3em;
+            list-style: disc
+        }
+
+        .typo-ol,
+        .typo ol {
+            list-style: decimal;
+            margin-left: 1.9em
+        }
+
+        .typo-ol ol,
+        .typo-ol ul,
+        .typo-ul ol,
+        .typo-ul ul,
+        .typo li ol,
+        .typo li ul {
+            margin-bottom: .8em;
+            margin-left: 2em
+        }
+
+        .typo-ol ul,
+        .typo-ul ul,
+        .typo li ul {
+            list-style: circle
+        }
+
+        .typo-table td,
+        .typo-table th,
+        .typo table caption,
+        .typo table td,
+        .typo table th {
+            border: 1px solid #ddd;
+            padding: .5em 1em;
+            color: #666
+        }
+
+        .typo-table th,
+        .typo table th {
+            background: #fbfbfb
+        }
+
+        .typo-table thead th,
+        .typo table thead th {
+            background: hsla(0, 0%, 95%, .7)
+        }
+
+        .typo table caption {
+            border-bottom: none
+        }
+
+        .typo-input,
+        .typo-textarea {
+            -webkit-appearance: none;
+            border-radius: 0
+        }
+
+        .typo-em,
+        .typo em,
+        caption,
+        legend {
+            color: #000;
+            font-weight: inherit
+        }
+
+        .typo-em {
+            position: relative
+        }
+
+        .typo-em:after {
+            position: absolute;
+            top: .65em;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            content: "\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB\30FB"
+        }
+
+        .typo img {
+            max-width: 100%
+        }
+
+        .common-content {
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.75rem;
+            white-space: normal;
+            word-break: normal;
+            font-size: 1rem
+        }
+
+        .common-content img {
+            display: block;
+            max-width: 100%;
+            background-color: #eee
+        }
+
+        .common-content audio,
+        .common-content video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        .common-content center,
+        .common-content font {
+            margin-top: 1rem;
+            display: inline-block
+        }
+
+        .common-content center {
+            width: 100%
+        }
+
+        .common-content pre {
+            margin-top: 1rem;
+            padding-left: 0;
+            padding-right: 0;
+            position: relative;
+            overflow: hidden
+        }
+
+        .common-content pre code {
+            font-size: .8rem;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            overflow-x: auto
+        }
+
+        .common-content hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        .common-content b,
+        .common-content h1,
+        .common-content h2,
+        .common-content h3,
+        .common-content h4,
+        .common-content h5,
+        .common-content strong {
+            font-weight: 700
+        }
+
+        .common-content h1,
+        .common-content h2 {
+            font-size: 1.125rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content h3,
+        .common-content h4,
+        .common-content h5 {
+            font-size: 1rem;
+            margin-bottom: .45rem
+        }
+
+        .common-content p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: .15rem
+        }
+
+        .common-content .orange {
+            color: #ff5a05
+        }
+
+        .common-content .reference {
+            font-size: 1rem;
+            color: #888
+        }
+
+        .custom-rich-content h1 {
+            margin-top: 0;
+            font-weight: 400;
+            font-size: 15.25px;
+            border-bottom: 1px solid #eee;
+            line-height: 2.8
+        }
+
+        .custom-rich-content li,
+        .custom-rich-content p {
+            font-size: 14px;
+            color: #888;
+            line-height: 1.6
+        }
+
+        table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        table.hljs-ln,
+        table.hljs-ln tbody,
+        table.hljs-ln td,
+        table.hljs-ln tr {
+            box-sizing: border-box
+        }
+
+        table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none
+        }
+
+        table.hljs-ln td.hljs-ln-code,
+        table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            font-size: 12px;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            color: #24292e;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+        video::-webkit-media-controls {
+            overflow: hidden !important
+        }
+
+        video::-webkit-media-controls-enclosure {
+            width: calc(100% + 32px);
+            margin-left: auto
+        }
+
+        ._29HP61GA_0 {
+            max-width:800px;
+            margin:0 auto;
+            margin-bottom: 20px;
+            font-weight: 400;
+            color: #353535;
+            line-height: 1.76;
+            white-space: normal;
+            word-break: normal;
+            font-size: 17px;
+            -webkit-transition: background-color .3s ease;
+            transition: background-color .3s ease
+        }
+
+        ._29HP61GA_0 .MathJax_Display {
+            overflow: auto
+        }
+
+        ._29HP61GA_0 .poster {
+            position: fixed;
+            left: -10000px;
+            top: -10000px;
+            overflow: hidden;
+            padding: 1rem;
+            background: #ececec
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy {
+            font-size: 13px;
+            color: #888;
+            position: absolute;
+            right: 1em;
+            top: .5em;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 .richcontent-pre-copy .iconfont {
+            font-size: 12px;
+            margin-right: .2em
+        }
+
+        ._29HP61GA_0 a {
+            color: #fa8919;
+            border-bottom: 1px solid #fa8919
+        }
+
+        ._29HP61GA_0 img {
+            display: block;
+            max-width: 100%;
+            position: relative;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            background-color: #eee;
+            vertical-align: top;
+            border-radius: 0
+        }
+
+        ._29HP61GA_0 audio,
+        ._29HP61GA_0 video {
+            width: 100%;
+            background-color: #eee
+        }
+
+        ._29HP61GA_0 pre {
+            margin-top: 16px;
+            padding: 34px 0 0;
+            margin-bottom: 30px;
+            position: relative;
+            border-radius: 6px;
+            background: rgba(246, 247, 251, .749);
+            border: 0
+        }
+
+        ._29HP61GA_0 pre code {
+            font-size: 12px;
+            font-family: Consolas, Liberation Mono, Menlo, monospace, Courier;
+            display: block;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            margin-left: 16px;
+            margin-right: 16px;
+            overflow-x: scroll
+        }
+
+        ._29HP61GA_0 pre code:after {
+            content: "";
+            height: 30px;
+            width: 100%;
+            display: block
+        }
+
+        ._29HP61GA_0 hr {
+            border: none;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-top: 1px solid #f5f5f5;
+            height: 1px;
+            background: none
+        }
+
+        ._29HP61GA_0 h1,
+        ._29HP61GA_0 h2,
+        ._29HP61GA_0 h3,
+        ._29HP61GA_0 h4,
+        ._29HP61GA_0 h5 {
+            margin-bottom: 20px;
+            margin-top: 0;
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 b,
+        ._29HP61GA_0 strong {
+            font-weight: 700
+        }
+
+        ._29HP61GA_0 h1 {
+            font-size: 21px
+        }
+
+        ._29HP61GA_0 h2 {
+            font-size: 20px
+        }
+
+        ._29HP61GA_0 h3 {
+            font-size: 19px
+        }
+
+        ._29HP61GA_0 h4 {
+            font-size: 18px
+        }
+
+        ._29HP61GA_0 h5 {
+            font-size: 17px
+        }
+
+        ._29HP61GA_0 center,
+        ._29HP61GA_0 p {
+            font-weight: 400;
+            color: #353535;
+            margin-top: 0;
+            margin-bottom: 30px;
+            word-break: break-word
+        }
+
+        ._29HP61GA_0 center {
+            text-align: center
+        }
+
+        ._29HP61GA_0 blockquote {
+            margin-top: 0;
+            margin-bottom: 34px;
+            border-left: 3px solid #e8e8e8;
+            padding-left: 17px;
+            color: #353535
+        }
+
+        ._29HP61GA_0 blockquote p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol,
+        ._29HP61GA_0 ul {
+            margin-bottom: 30px
+        }
+
+        ._29HP61GA_0 ol p,
+        ._29HP61GA_0 ul p {
+            margin-top: 0;
+            margin-bottom: 0
+        }
+
+        ._29HP61GA_0 ol {
+            list-style: decimal;
+            margin-left: 20px
+        }
+
+        ._29HP61GA_0 ul li {
+            padding-left: 17px;
+            position: relative;
+            margin-bottom: 10px
+        }
+
+        ._29HP61GA_0 ul li:after {
+            content: "";
+            height: 6px;
+            width: 6px;
+            border-radius: 50%;
+            background: #353535;
+            position: absolute;
+            top: 10px;
+            left: 0
+        }
+
+        ._29HP61GA_0 .orange {
+            color: #fa8919
+        }
+
+        ._29HP61GA_0 .reference {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-right {
+            text-align: right
+        }
+
+        ._29HP61GA_0 .m-center {
+            text-align: center;
+            display: block
+        }
+
+        ._29HP61GA_0 .m-gray {
+            color: #888
+        }
+
+        ._29HP61GA_0 .m-small {
+            font-size: 15px
+        }
+
+        ._29HP61GA_0 table.hljs-ln {
+            margin-bottom: 0;
+            border-spacing: 0;
+            border-collapse: collapse
+        }
+
+        ._29HP61GA_0 table.hljs-ln,
+        ._29HP61GA_0 table.hljs-ln tbody,
+        ._29HP61GA_0 table.hljs-ln td,
+        ._29HP61GA_0 table.hljs-ln tr {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box
+        }
+
+        ._29HP61GA_0 table.hljs-ln td {
+            padding: 0;
+            border: 0
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            min-width: 15px;
+            font-size: 12px;
+            color: rgba(27, 31, 35, .3);
+            text-align: right;
+            white-space: nowrap;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code,
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-numbers {
+            font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, Courier, monospace;
+            line-height: 20px;
+            vertical-align: top
+        }
+
+        ._29HP61GA_0 table.hljs-ln td.hljs-ln-code {
+            position: relative;
+            padding-right: 10px;
+            padding-left: 10px;
+            overflow: visible;
+            font-size: 13px;
+            color: #666;
+            word-wrap: normal;
+            white-space: pre
+        }
+
+    </style>
+</head>
+<body>
+<div class="_29HP61GA_0">
+<h1>01-可见性、原子性和有序性问题：并发编程Bug的源头</h1>
+<p>如果你细心观察的话，你会发现，不管是哪一门编程语言，并发类的知识都是在高级篇里。换句话说，这块知识点其实对于程序员来说，是比较进阶的知识。我自己这么多年学习过来，也确实觉得并发是比较难的，因为它会涉及到很多的底层知识，比如若你对操作系统相关的知识一无所知的话，那去理解一些原理就会费些力气。这是我们整个专栏的第一篇文章，我说这些话的意思是如果你在中间遇到自己没想通的问题，可以去查阅资料，也可以在评论区找我，以保证你能够跟上学习进度。</p><p>你我都知道，编写正确的并发程序是一件极困难的事情，并发程序的Bug往往会诡异地出现，然后又诡异地消失，很难重现，也很难追踪，很多时候都让人很抓狂。但要快速而又精准地解决“并发”类的疑难杂症，你就要理解这件事情的本质，追本溯源，深入分析这些Bug的源头在哪里。</p><p>那为什么并发编程容易出问题呢？它是怎么出问题的？今天我们就重点聊聊这些Bug的源头。</p><h2>并发程序幕后的故事</h2><p>这些年，我们的CPU、内存、I/O设备都在不断迭代，不断朝着更快的方向努力。但是，在这个快速发展的过程中，有一个<strong>核心矛盾一直存在，就是这三者的速度差异</strong>。CPU和内存的速度差异可以形象地描述为：CPU是天上一天，内存是地上一年（假设CPU执行一条普通指令需要一天，那么CPU读写内存得等待一年的时间）。内存和I/O设备的速度差异就更大了，内存是天上一天，I/O设备是地上十年。</p><!-- [[[read_end]]] --><p>程序里大部分语句都要访问内存，有些还要访问I/O，根据木桶理论（一只水桶能装多少水取决于它最短的那块木板），程序整体的性能取决于最慢的操作——读写I/O设备，也就是说单方面提高CPU性能是无效的。</p><p>为了合理利用CPU的高性能，平衡这三者的速度差异，计算机体系机构、操作系统、编译程序都做出了贡献，主要体现为：</p><ol>
+<li>CPU增加了缓存，以均衡与内存的速度差异；</li>
+<li>操作系统增加了进程、线程，以分时复用CPU，进而均衡CPU与I/O设备的速度差异；</li>
+<li>编译程序优化指令执行次序，使得缓存能够得到更加合理地利用。</li>
+</ol><p>现在我们几乎所有的程序都默默地享受着这些成果，但是天下没有免费的午餐，并发程序很多诡异问题的根源也在这里。</p><h2>源头之一：缓存导致的可见性问题</h2><p>在单核时代，所有的线程都是在一颗CPU上执行，CPU缓存与内存的数据一致性容易解决。因为所有线程都是操作同一个CPU的缓存，一个线程对缓存的写，对另外一个线程来说一定是可见的。例如在下面的图中，线程A和线程B都是操作同一个CPU里面的缓存，所以线程A更新了变量V的值，那么线程B之后再访问变量V，得到的一定是V的最新值（线程A写过的值）。</p><p><img src="https://static001.geekbang.org/resource/image/a0/da/a07e8182819e2b260ce85b2167d446da.png" alt=""></p><center><span class="reference">CPU缓存与内存的关系图</span></center><p>一个线程对共享变量的修改，另外一个线程能够立刻看到，我们称为<strong>可见性</strong>。</p><p>多核时代，每颗CPU都有自己的缓存，这时CPU缓存与内存的数据一致性就没那么容易解决了，当多个线程在不同的CPU上执行时，这些线程操作的是不同的CPU缓存。比如下图中，线程A操作的是CPU-1上的缓存，而线程B操作的是CPU-2上的缓存，很明显，这个时候线程A对变量V的操作对于线程B而言就不具备可见性了。这个就属于硬件程序员给软件程序员挖的“坑”。</p><p><img src="https://static001.geekbang.org/resource/image/e2/ea/e2aa76928b2bc135e08e7590ca36e0ea.png" alt=""></p><center><span class="reference">多核CPU的缓存与内存关系图</span></center><p>下面我们再用一段代码来验证一下多核场景下的可见性问题。下面的代码，每执行一次add10K()方法，都会循环10000次count+=1操作。在calc()方法中我们创建了两个线程，每个线程调用一次add10K()方法，我们来想一想执行calc()方法得到的结果应该是多少呢？</p><pre><code>public class Test {
+  private long count = 0;
+  private void add10K() {
+    int idx = 0;
+    while(idx++ &lt; 10000) {
+      count += 1;
+    }
+  }
+  public static long calc() {
+    final Test test = new Test();
+    // 创建两个线程，执行add()操作
+    Thread th1 = new Thread(()-&gt;{
+      test.add10K();
+    });
+    Thread th2 = new Thread(()-&gt;{
+      test.add10K();
+    });
+    // 启动两个线程
+    th1.start();
+    th2.start();
+    // 等待两个线程执行结束
+    th1.join();
+    th2.join();
+    return count;
+  }
+}
+</code></pre><p>直觉告诉我们应该是20000，因为在单线程里调用两次add10K()方法，count的值就是20000，但实际上calc()的执行结果是个10000到20000之间的随机数。为什么呢？</p><p>我们假设线程A和线程B同时开始执行，那么第一次都会将 count=0 读到各自的CPU缓存里，执行完 count+=1 之后，各自CPU缓存里的值都是1，同时写入内存后，我们会发现内存中是1，而不是我们期望的2。之后由于各自的CPU缓存里都有了count的值，两个线程都是基于CPU缓存里的 count 值来计算，所以导致最终count的值都是小于20000的。这就是缓存的可见性问题。</p><p>循环10000次count+=1操作如果改为循环1亿次，你会发现效果更明显，最终count的值接近1亿，而不是2亿。如果循环10000次，count的值接近20000，原因是两个线程不是同时启动的，有一个时差。</p><p><img src="https://static001.geekbang.org/resource/image/ec/79/ec6743e74ccf9a3c6d6c819a41e52279.png" alt=""></p><center><span class="reference">变量count在CPU缓存和内存的分布图</span></center><h2>源头之二：线程切换带来的原子性问题</h2><p>由于IO太慢，早期的操作系统就发明了多进程，即便在单核的CPU上我们也可以一边听着歌，一边写Bug，这个就是多进程的功劳。</p><p>操作系统允许某个进程执行一小段时间，例如50毫秒，过了50毫秒操作系统就会重新选择一个进程来执行（我们称为“任务切换”），这个50毫秒称为“<strong>时间片</strong>”。</p><p><img src="https://static001.geekbang.org/resource/image/25/fb/254b129b145d80e9bb74123d6e620efb.png" alt=""></p><center><span class="reference">线程切换示意图</span></center><p>在一个时间片内，如果一个进程进行一个IO操作，例如读个文件，这个时候该进程可以把自己标记为“休眠状态”并出让CPU的使用权，待文件读进内存，操作系统会把这个休眠的进程唤醒，唤醒后的进程就有机会重新获得CPU的使用权了。</p><p>这里的进程在等待IO时之所以会释放CPU使用权，是为了让CPU在这段等待时间里可以做别的事情，这样一来CPU的使用率就上来了；此外，如果这时有另外一个进程也读文件，读文件的操作就会排队，磁盘驱动在完成一个进程的读操作后，发现有排队的任务，就会立即启动下一个读操作，这样IO的使用率也上来了。</p><p>是不是很简单的逻辑？但是，虽然看似简单，支持多进程分时复用在操作系统的发展史上却具有里程碑意义，Unix就是因为解决了这个问题而名噪天下的。</p><p>早期的操作系统基于进程来调度CPU，不同进程间是不共享内存空间的，所以进程要做任务切换就要切换内存映射地址，而一个进程创建的所有线程，都是共享一个内存空间的，所以线程做任务切换成本就很低了。现代的操作系统都基于更轻量的线程来调度，现在我们提到的“任务切换”都是指“线程切换”。</p><p>Java并发程序都是基于多线程的，自然也会涉及到任务切换，也许你想不到，任务切换竟然也是并发编程里诡异Bug的源头之一。任务切换的时机大多数是在时间片结束的时候，我们现在基本都使用高级语言编程，高级语言里一条语句往往需要多条CPU指令完成，例如上面代码中的<code>count += 1</code>，至少需要三条CPU指令。</p><ul>
+<li>指令1：首先，需要把变量count从内存加载到CPU的寄存器；</li>
+<li>指令2：之后，在寄存器中执行+1操作；</li>
+<li>指令3：最后，将结果写入内存（缓存机制导致可能写入的是CPU缓存而不是内存）。</li>
+</ul><p>操作系统做任务切换，可以发生在任何一条<strong>CPU指令</strong>执行完，是的，是CPU指令，而不是高级语言里的一条语句。对于上面的三条指令来说，我们假设count=0，如果线程A在指令1执行完后做线程切换，线程A和线程B按照下图的序列执行，那么我们会发现两个线程都执行了count+=1的操作，但是得到的结果不是我们期望的2，而是1。</p><p><img src="https://static001.geekbang.org/resource/image/33/63/33777c468872cb9a99b3cdc1ff597063.png" alt=""></p><center><span class="reference">非原子操作的执行路径示意图</span></center><p>我们潜意识里面觉得count+=1这个操作是一个不可分割的整体，就像一个原子一样，线程的切换可以发生在count+=1之前，也可以发生在count+=1之后，但就是不会发生在中间。<strong>我们把一个或者多个操作在CPU执行的过程中不被中断的特性称为原子性</strong>。CPU能保证的原子操作是CPU指令级别的，而不是高级语言的操作符，这是违背我们直觉的地方。因此，很多时候我们需要在高级语言层面保证操作的原子性。</p><h2>源头之三：编译优化带来的有序性问题</h2><p>那并发编程里还有没有其他有违直觉容易导致诡异Bug的技术呢？有的，就是有序性。顾名思义，有序性指的是程序按照代码的先后顺序执行。编译器为了优化性能，有时候会改变程序中语句的先后顺序，例如程序中：“a=6；b=7；”编译器优化后可能变成“b=7；a=6；”，在这个例子中，编译器调整了语句的顺序，但是不影响程序的最终结果。不过有时候编译器及解释器的优化可能导致意想不到的Bug。</p><p>在Java领域一个经典的案例就是利用双重检查创建单例对象，例如下面的代码：在获取实例getInstance()的方法中，我们首先判断instance是否为空，如果为空，则锁定Singleton.class并再次检查instance是否为空，如果还为空则创建Singleton的一个实例。</p><pre><code>public class Singleton {
+  static Singleton instance;
+  static Singleton getInstance(){
+    if (instance == null) {
+      synchronized(Singleton.class) {
+        if (instance == null)
+          instance = new Singleton();
+        }
+    }
+    return instance;
+  }
+}
+</code></pre><p>假设有两个线程A、B同时调用getInstance()方法，他们会同时发现 <code>instance == null</code> ，于是同时对Singleton.class加锁，此时JVM保证只有一个线程能够加锁成功（假设是线程A），另外一个线程则会处于等待状态（假设是线程B）；线程A会创建一个Singleton实例，之后释放锁，锁释放后，线程B被唤醒，线程B再次尝试加锁，此时是可以加锁成功的，加锁成功后，线程B检查 <code>instance == null</code> 时会发现，已经创建过Singleton实例了，所以线程B不会再创建一个Singleton实例。</p><p>这看上去一切都很完美，无懈可击，但实际上这个getInstance()方法并不完美。问题出在哪里呢？出在new操作上，我们以为的new操作应该是：</p><ol>
+<li>分配一块内存M；</li>
+<li>在内存M上初始化Singleton对象；</li>
+<li>然后M的地址赋值给instance变量。</li>
+</ol><p>但是实际上优化后的执行路径却是这样的：</p><ol>
+<li>分配一块内存M；</li>
+<li>将M的地址赋值给instance变量；</li>
+<li>最后在内存M上初始化Singleton对象。</li>
+</ol><p>优化后会导致什么问题呢？我们假设线程A先执行getInstance()方法，当执行完指令2时恰好发生了线程切换，切换到了线程B上；如果此时线程B也执行getInstance()方法，那么线程B在执行第一个判断时会发现 <code>instance != null</code> ，所以直接返回instance，而此时的instance是没有初始化过的，如果我们这个时候访问 instance 的成员变量就可能触发空指针异常。</p><p><img src="https://static001.geekbang.org/resource/image/64/d8/64c955c65010aae3902ec918412827d8.png" alt=""></p><center><span class="reference">双重检查创建单例的异常执行路径</span></center><h2>总结</h2><p>要写好并发程序，首先要知道并发程序的问题在哪里，只有确定了“靶子”，才有可能把问题解决，毕竟所有的解决方案都是针对问题的。并发程序经常出现的诡异问题看上去非常无厘头，但是深究的话，无外乎就是直觉欺骗了我们，<strong>只要我们能够深刻理解可见性、原子性、有序性在并发场景下的原理，很多并发Bug都是可以理解、可以诊断的</strong>。</p><p>在介绍可见性、原子性、有序性的时候，特意提到<strong>缓存</strong>导致的可见性问题，<strong>线程切换</strong>带来的原子性问题，<strong>编译优化</strong>带来的有序性问题，其实缓存、线程、编译优化的目的和我们写并发程序的目的是相同的，都是提高程序性能。但是技术在解决一个问题的同时，必然会带来另外一个问题，所以<strong>在采用一项技术的同时，一定要清楚它带来的问题是什么，以及如何规避</strong>。</p><p>我们这个专栏在讲解每项技术的时候，都会尽量将每项技术解决的问题以及产生的问题讲清楚，也希望你能够在这方面多思考、多总结。</p><h2>课后思考</h2><p>常听人说，在32位的机器上对long型变量进行加减操作存在并发隐患，到底是不是这样呢？现在相信你一定能分析出来。</p><p>欢迎在留言区与我分享你的想法，也欢迎你在留言区记录你的思考过程。感谢阅读，如果你觉得这篇文章对你有帮助的话，也欢迎把它分享给更多的朋友。</p><p><img src="https://static001.geekbang.org/resource/image/f3/9c/f3531b6230d4ebadc020e056ff5d009c.jpg" alt=""></p><h2>精选留言：</h2>
+        <ul>
+        
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Jialin  2019-02-28 09:51:48
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            对于双重锁的问题，我觉得任大鹏分析的蛮有道理，线程A进入第二个判空条件，进行初始化时，发生了时间片切换，即使没有释放锁，线程B刚要进入第一个判空条件时，发现条件不成立，直接返回instance引用，不用去获取锁。如果对instance进行volatile语义声明，就可以禁止指令重排序，避免该情况发生。<br>对于有些同学对CPU缓存和内存的疑问，CPU缓存不存在于内存中的，它是一块比内存更小、读写速度更快的芯片，至于什么时候把数据从缓存写到内存，没有固定的时间，同样地，对于有volatile语义声明的变量，线程A执行完后会强制将值刷新到内存中，线程B进行相关操作时会强制重新把内存中的内容写入到自己的缓存，这就涉及到了volatile的写入屏障问题，当然也就是所谓happen-before问题。 [158赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:52:45</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">厉害厉害，比我回答的全面多了</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            json  2019-02-28 01:19:02
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            long类型64位，所以在32位的机器上，对long类型的数据操作通常需要多条指令组合出来，无法保证原子性，所以并发的时候会出问题🌝🌝🌝 [85赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:26:00</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">正解</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            任大鹏  2019-02-28 08:37:53
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            对于阿根一世同学的那个疑问，我个人认为CPU时间片切换后，线程B刚好执行到第一次判断instance==null，此时不为空，不用进入synchronized里，就将还未初始化的instance返回了 [67赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:33:05</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">正解！感谢回复。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            阿根一世  2019-02-28 07:55:35
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            对于双重锁检查那个例子，我有一个疑问，A如果没有完成实例的初始化，锁应该不会释放的，B是拿不到锁的，怎么还会出问题呢？ [66赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:31:30</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">后面好多同学已经帮我作答了，教好学生，饿死师傅啊</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            Blithe  2019-02-28 22:55:56
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            对于阿根一世的提问，以及文中作者的描述，我有自己的看法。阿根一世的提问是对的，作者的描述是有误的，但作者的结论是正确的。<br>我的解释如下：两个线程都过了第一层判空后，第二个线程不会出现文中说的空指针异常。因为JSR-133中的happens-before规则。1.一个线程中的每个操作先于线程中的后续操作。2.对一个锁的解锁先于随后对这个锁的解锁。3.传递行。综合以上三条规则，第一个线程的对象初始化完成先于解锁，第一个线程的解锁先于第二个线程的加锁。所以，真如作者所说第二线程如果过了第一层的判空校验，下步就要加锁，加锁后其实对象在线程一中已经初始化结束，不会出现NPE。但例子的确会出现NPE问题，出现的场景却是，线程二没有进行到第一层判空操作，线程一到了文中说的时间片结束，让出CPU，线程二判空，否，执行对象调用方法。有问题，可加微信交流Blithe-Feng [30赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 17:56:01</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我看了一下，的确是我的描述有问题。感谢啊！<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            QIANQIANCHEN  2019-02-28 11:58:01
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            刚看过《java并发实战》，又是看了个开始就看不下去了😂😂，希望订阅专栏可以跟老师和其他童鞋一起坚持学习并发编程😄😄<br><br>思考题：在32位的机器上对long型变量进行加减操作存在并发隐患的说法是正确的。<br>原因就是文章里的bug源头之二：线程切换带来的原子性问题。<br>非volatile类型的long和double型变量是8字节64位的，32位机器读或写这个变量时得把人家咔嚓分成两个32位操作，可能一个线程读了某个值的高32位，低32位已经被另一个线程改了。所以官方推荐最好把long\double 变量声明为volatile或是同步加锁synchronize以避免并发问题。<br><br>贴一段java文档的说明<br>https:&#47;&#47;docs.oracle.com&#47;javase&#47;specs&#47;jls&#47;se8&#47;html&#47;jls-17.html#jls-17.7<br><br>17.7. Non-Atomic Treatment of double and long<br><br>For the purposes of the Java programming language memory model, a single write to a non-volatile long or double value is treated as two separate writes: one to each 32-bit half. This can result in a situation where a thread sees the first 32 bits of a 64-bit value from one write, and the second 32 bits from another write.<br><br>Writes and reads of volatile long and double values are always atomic.<br><br>Writes to and reads of references are always atomic, regardless of whether they are implemented as 32-bit or 64-bit values.<br><br>Some implementations may find it convenient to divide a single write action on a 64-bit long or double value into two write actions on adjacent 32-bit values. For efficiency&#39;s sake, this behavior is implementation-specific; an implementation of the Java Virtual Machine is free to perform writes to long and double values atomically or in two parts.<br><br>Implementations of the Java Virtual Machine are encouraged to avoid splitting 64-bit values where possible. Programmers are encouraged to declare shared 64-bit values as volatile or synchronize their programs correctly to avoid possible complications. [28赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 00:00:02</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">厉害厉害</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            xx鼠  2019-02-28 01:10:53
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            Singleton instance改为volatile或者final就完美了，这里面其实涉及Java的happen-before原则。 [26赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:25:47</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">恭喜你，学会抢答了！</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            嘎嘎  2019-02-28 18:26:51
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            针对阿根一世的问题，问题其实出现在new Singleton()这里。<br>这一行分对于CPU来讲，有3个指令：<br>1.分配内存空间<br>2.初始化对象<br>3.instance引用指向内存空间<br>正常执行顺序1-2-3<br>但是CPU重排序后执行顺序可能为1-3-2，那么问题就来了<br>步骤如下：<br>1.A、B线程同时进入了第一个if判断<br>2.A首先进入synchronized块，由于instance为null，所以它执行instance = new Singleton();<br>3.然后线程A执行1-&gt; JVM先画出了一些分配给Singleton实例的空白内存，并赋值给instance<br>4.在还没有进行第三步（将instance引用指向内存空间）的时候，线程A离开了synchronized块<br>5.线程B进入synchronized块，读取到了A线程返回的instance，此时这个instance并未进行物理地址指向，是一个空对象。<br>有人说将对象设置成volatile，其实也不能完全解决问题。volatile只是保证可见性，并不保证原子性。<br><br>现行的比较通用的做法就是采用静态内部类的方式来实现。<br>public class MySingleton {<br>	<br>	&#47;&#47;内部类<br>	private static class MySingletonHandler{<br>		private static MySingleton instance = new MySingleton();<br>	} <br>	<br>	private MySingleton(){}<br>	 <br>	public static MySingleton getInstance() { <br>		return MySingletonHandler.instance;<br>	}<br>} [22赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 00:25:39</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">厉害，一看就是经验丰富</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            summer_Day  2019-02-28 11:08:37
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            我觉得阿根一世的问题应该是<br>synchronized(Singleton.class) {<br>        if (instance == null)<br>          instance = new Singleton();<br>        }<br>对于synchronized关键字已经对代码块进行加锁了<br>我理解应该等价于<br>synchronized(Singleton.class) {<br>        if (instance == null) {<br>          分配一块内存 M；<br>          将 M 的地址赋值给 instance 变量；<br>          最后在内存 M 上初始化 Singleton 对象。<br>        }<br>  }<br> A如果没有完成实例的初始化，锁应该不会释放的，B是拿不到锁的，怎么还会出问题呢？<br> [15赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            落墨  2019-02-28 11:08:16
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师,运行文中的测试代码,有时会出现9000多的结果,不知道是什么原因? [14赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:57:38</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">并发程序的诡异之处，就在于：我实在也想不通。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            我会得到  2019-02-28 00:26:15
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            零点一过刚好看到更新，果断一口气读完，带劲！可见性，原子性，有序性，操作系统作为基础，内存模型，机器指令，编译原理，一个都不能少，开始有点意思了👍 [11赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:22:13</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">后面讲内存模型，会更有意思。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            黄朋飞  2019-02-28 08:05:20
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师你好，请问文章中的缓存和内存什么区别，缓存不是在内存中存放着吗？ [8赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-02-28 23:32:24</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">对不起，是我没说清楚，这里的缓存，指的是CPU缓存。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            波波  2019-03-01 21:50:27
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            为老师点赞，讲了并发产生的前世今生，通俗易懂又不失深度。 [7赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 22:30:08</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">这么夸我，我真的会骄傲的<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            牧童纪年  2019-02-28 17:51:35
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            王老师，你文章中讲的 优化指令的执行次序 使得缓存能够更加合理的利用是什么意思？ [6赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 00:24:41</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">比如第1行：a=8<br>第1000行：a=a*2;<br>这个时候，把他们放到一起执行，是不是就能更好的利用缓存了？</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            别皱眉  2019-03-16 10:09:12
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            周末了<br>对留言问题总结一下<br> <br>------可见性问题------<br>对于可见性那个例子我们先看下定义:<br>可见性:一个线程对共享变量的修改，另外一个线程能够立刻看到<br> <br>并发问题往往都是综合证，这里即使是单核CPU，只要出现线程切换就会有原子性问题。但老师的目的是为了让大家明白什么是可见性<br>或许我们可以把线程对变量的读可写都看作时原子操作，也就是cpu对变量的操作中间状态不可见，这样就能更加理解什么是可见性了。<br> <br>------CPU缓存刷新到内存的时机------<br>cpu将缓存写入内存的时机是不确定的。除非你调用cpu相关指令强刷<br> <br>------双重锁问题------<br>如果A线程与B线程如果同时进入第一个分支，那么这个程序就没有问题<br> <br>如果A线程先获取锁并出现指令重排序时，B线程未进入第一个分支，那么就可能出现空指针问题，这里说可能出现问题是因为当把内存地址赋值给共享变量后，CPU将数据写回缓存的时机是随机的<br> <br>------ synchronized------<br>线程在synchronized块中，发生线程切换，锁是不会释放的<br> <br>------指令优化------<br>除了编译优化,有一部分可以通过看汇编代码来看，但是CPU和解释器在运行期也会做一部分优化，所以很多时候都是看不到的，也很难重现。<br> <br>------JMM模型和物理内存、缓存等关系------<br>内存、cpu缓存是物理存在，jvm内存是软件存在的。<br>关于线程的工作内存和寄存器、cpu缓存的关系 大家可以参考这篇文章<br>https:&#47;&#47;blog.csdn.net&#47;u013851082&#47;article&#47;details&#47;70314778&#47;<br> <br>------IO操作------<br>io操作不占用cpu，读文件，是设备驱动干的事，cpu只管发命令。发完命令，就可以干别的事情了。<br> <br> <br>------寄存器切换------ <br>寄存器是共用的，A线程切换到B线程的时候，寄存器会把操作A的相关内容会保存到内存里，切换回来的时候，会从内存把内容加载到寄存器。可以理解为每个线程有自己的寄存器<br> <br>请老师帮忙看看，有没问题。希望我的总结能帮到更多人😄😄 [5赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-16 10:56:35</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">没问题，总结的太到位了！！！</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            发条橙子 。  2019-02-28 22:13:21
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师 ，我有几个问题希望老师指点 ，也是涉及到操作系统的：<br><br>1.  操作系统是以进程为单位共享资源 ，以线程单位进行调用 。 多个线程共享一个进程的资源 。 一个java应用占一个进程（jvm的内存模型的资源也在这个进程中） ，一个进程占一个cpu ， 所以老师所说的多核cpu缓存，每个cpu有自己的缓存 ，AB两个线程在不同的cpu上操作不太理解 ， 一个应用的AB两个线程是不是应该处在同个cpu上面 ？？？<br><br>2. 如果按照老师所说不同线程在不同cpu上运行 ， 是不是有个叫并行和并发的概念 。 单个cpu的时候多线程实际上是模拟并发的并行，实际上cpu只能一次执行一个线程，两个线程交替执行。 而到了多核中，可以真正的将两个线程AB同时分给cpu1 .cpu2同时执行，称之为并发？？<br><br>3. 我感觉老师第二点原子性中也有包含可见性问题，由于时间片到了， 当把资源读到自己的工作线程中时，由于不可见性，以为自己是最新的导致值不准确，这个也对应了第一个问题 ， 两个线程是否在同个进程内共享资源<br><br>问题有点多 ， 可能自己的理解有偏差 ，希望老师指正<br> [5赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 00:44:47</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">进程和线程的关系，你可以看看操作系统原理。进程不占有CPU。操作系统会把CPU分配给线程。分到CPU的线程就能执行。<br>并行，是同一时刻，两个线程都在执行。并发，是同一时刻，只有一个执行，但是一个时间段内，两个线程都执行了。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            rayjun  2019-03-03 09:01:12
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            第一个测试代码是不是有点问题，在静态方法中怎么能访问非静态变量呢？ [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-03 11:34:45</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">我本地测试的代码是下面这样的，为了说明问题，为了不占用篇幅，做了删减。final Test test = new Test();使用test访问的，所以可以访问<br><br>public class Test {<br>    private int count = 0;<br>    private void add() {<br>        int idx = 0;<br>        while(idx++ &lt; 10000000) {<br>            count += 1;<br>        }<br>    }<br>    public static int calc() throws Exception {<br>        final Test test = new Test();<br>        Thread th1 = new Thread(()-&gt;{<br>            test.add();<br>        });<br>        Thread th2 = new Thread(()-&gt;{<br>            test.add();<br>        });<br><br>        th1.start();<br>        th2.start();<br>        th1.join();<br>        th2.join();<br>        return test.count;<br>    }<br><br>    public static void main(String[] args) throws Exception {<br>        long c =calc();<br>        System.out.println(c);<br>    }<br>}<br></div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            ... ...  2019-02-28 22:43:35
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            老师，上面的两个线程的例子应该不是可见性导致而是原子性导致的吧！如果是可见性导致的话，我在变量count上加个volatile应该可以解决问题啊！还发现个小问题，非静态变量应该不能直接用于静态方法中吧！ [4赞]
+        </div>
+        <br/>
+<div>
+    <div style="color:#888;font-size:15.25px;font-weight:400;line-height:1.2">作者回复2019-03-01 00:52:57</div>
+    <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">示例代码，只是为了说明问题。考虑到大家手机屏幕的尺寸，能省就省了<br>这个例子不仅仅是可见性的问题，并发问题往往都是综合证。</div>
+</div>
+            
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            cfreedomc  2019-02-28 12:51:48
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            今天主要学习了并发编程中三种类型的问题<br>1.缓存导致的可见性问题<br>2.线程切换导致的原子性问题<br>3.编译优化带来的有序性问题<br>也是让我认识到我们编程其实和医生看病一样，项目就是病人，当你给病人开药时，药的好处不必多说，更重要的是对于药的副作用有个清晰的认识才是一个好的医生<br><br>最后从这节课后，遇到并发问题，我也可以系统的通过将问题分类到是以上哪种或者哪几种问题去解决问题<br><br>如今天的课后题目，在java中 Long类型是64位的，在32位的系统中，Cpu指令要进行多次操作，无法保证原子性 [4赞]
+        </div>
+        
+    </div>
+</li>
+            
+<br/>
+
+<li>
+    <div>
+        <div style="color: #888;font-size:15.25px;font-weight:400;line-height:1.2">
+            小辉辉  2019-03-14 23:59:00
+        </div>
+        <div style="color:#353535;font-weight:400;white-space:normal;word-break:break-all;line-height:1.6">
+            看完这一篇，觉得我之前看的《Java高并发编程详解》和《深入理解Java虚拟机》两本书没白看，至少看懂老师说的问题了，看完评论（差不多半小时），原来高手都在评论区😀 😀 😀  [3赞]
+        </div>
+        
+    </div>
+</li>
+            </ul>
+</div>
+</body>
+</html>
